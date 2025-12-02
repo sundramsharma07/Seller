@@ -1,0 +1,1970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naman Enterprises - Customer Management Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;500;600;700&display=swap">
+    <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        .roboto-slab {
+            font-family: 'Roboto Slab', serif;
+        }
+        .construction-gradient {
+            background: linear-gradient(135deg, #1a365d 0%, #2d3748 100%);
+        }
+        .btn-gradient {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+        }
+        .btn-gradient:hover {
+            background: linear-gradient(135deg, #c53030 0%, #9b2c2c 100%);
+        }
+        .card-shadow {
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+        .material-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .material-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2);
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .slide-up {
+            animation: slideUp 0.8s ease-out;
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .fade-in {
+            animation: fadeIn 1s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .construction-border {
+            position: relative;
+            border: 2px solid #e53e3e;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .status-paid {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        .status-pending {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+        .status-overdue {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+        .search-highlight {
+            background-color: #fef3c7;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        .payment-record {
+            border-left: 4px solid;
+            transition: all 0.3s;
+        }
+        .payment-paid {
+            border-left-color: #10b981;
+        }
+        .payment-pending {
+            border-left-color: #f59e0b;
+        }
+        .customer-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Main Dashboard Container -->
+    <div id="dashboard-container" class="min-h-screen">
+        <!-- Enhanced Dashboard Header -->
+        <header class="construction-gradient text-white p-4 shadow-xl">
+            <div class="container mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                    <div class="flex items-center space-x-3 mb-4 md:mb-0">
+                        <div class="construction-border p-3 bg-gray-900">
+                            <i class="fas fa-hard-hat text-2xl text-red-500"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold roboto-slab">NAMAN <span class="text-red-500">ENTERPRISES</span></h1>
+                            <div class="flex items-center space-x-2 text-sm opacity-90">
+                                <span>Customer Management Dashboard</span>
+                                <span class="text-white/50">•</span>
+                                <span id="current-date"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <button id="manage-pricing-btn" class="bg-gray-800 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-700 transition border border-gray-700">
+                            <i class="fas fa-tags mr-2"></i>Manage Pricing
+                        </button>
+                        <button id="export-excel-btn" class="btn-gradient text-white px-4 py-2 rounded-lg font-medium hover:shadow-lg transition">
+                            <i class="fas fa-file-excel mr-2"></i>Export Excel
+                        </button>
+                        <button id="customer-search-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition">
+                            <i class="fas fa-search mr-2"></i>Search Customer
+                        </button>
+                        <button id="logout-btn" class="bg-gray-800 text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-700 transition border border-gray-700">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Customer Search Modal -->
+        <div id="search-modal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 hidden">
+            <div class="bg-gray-900 rounded-2xl p-8 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-white roboto-slab">
+                        <i class="fas fa-search mr-2 text-red-500"></i>Search Customer
+                    </h2>
+                    <button id="close-search-modal" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-6">
+                    <!-- Search Form -->
+                    <div class="bg-gray-800 rounded-xl p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-300 mb-2 font-medium">Search by Name</label>
+                                <input type="text" id="search-name" 
+                                       class="w-full px-4 py-3 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                       placeholder="Enter customer name">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 mb-2 font-medium">Search by Phone</label>
+                                <input type="tel" id="search-phone" 
+                                       class="w-full px-4 py-3 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                       placeholder="Enter phone number">
+                            </div>
+                        </div>
+                        <div class="mt-4 flex justify-end">
+                            <button id="perform-search-btn" class="btn-gradient text-white px-6 py-3 rounded-lg font-medium">
+                                <i class="fas fa-search mr-2"></i>Search Customer
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Search Results -->
+                    <div id="search-results" class="hidden">
+                        <h3 class="text-xl font-bold text-white mb-4">Search Results</h3>
+                        <div class="space-y-4" id="search-results-list">
+                            <!-- Results will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Customer Details -->
+                    <div id="customer-details" class="hidden">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-bold text-white" id="selected-customer-name"></h3>
+                            <div class="space-x-3">
+                                <button id="export-customer-excel" class="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700">
+                                    <i class="fas fa-file-excel mr-2"></i>Export Excel
+                                </button>
+                                <button id="add-payment-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700">
+                                    <i class="fas fa-rupee-sign mr-2"></i>Add Payment
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Customer Info -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <div class="bg-gray-800 rounded-xl p-6">
+                                <h4 class="font-bold text-white mb-4">Customer Information</h4>
+                                <div class="space-y-3" id="customer-info">
+                                    <!-- Info will be populated here -->
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gray-800 rounded-xl p-6">
+                                <h4 class="font-bold text-white mb-4">Financial Summary</h4>
+                                <div class="space-y-4" id="financial-summary">
+                                    <!-- Summary will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Payment History -->
+                        <div class="bg-gray-800 rounded-xl p-6">
+                            <div class="flex justify-between items-center mb-6">
+                                <h4 class="font-bold text-white">Payment History</h4>
+                                <button id="add-new-payment-btn" class="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700">
+                                    <i class="fas fa-plus mr-2"></i>Add Payment Record
+                                </button>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead class="bg-gray-900">
+                                        <tr>
+                                            <th class="py-3 px-4 text-left text-gray-300">Date</th>
+                                            <th class="py-3 px-4 text-left text-gray-300">Amount</th>
+                                            <th class="py-3 px-4 text-left text-gray-300">Payment Mode</th>
+                                            <th class="py-3 px-4 text-left text-gray-300">Reference</th>
+                                            <th class="py-3 px-4 text-left text-gray-300">Status</th>
+                                            <th class="py-3 px-4 text-left text-gray-300">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="payment-history-table">
+                                        <!-- Payment history will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Purchase History -->
+                        <div class="bg-gray-800 rounded-xl p-6 mt-6">
+                            <h4 class="font-bold text-white mb-6">Purchase History</h4>
+                            <div class="space-y-6" id="purchase-history">
+                                <!-- Purchase history will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Modal -->
+        <div id="payment-modal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 hidden">
+            <div class="bg-gray-900 rounded-2xl p-8 max-w-md w-full mx-4">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-white">
+                        <i class="fas fa-rupee-sign mr-2 text-red-500"></i>Add Payment
+                    </h2>
+                    <button id="close-payment-modal" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+                
+                <form id="payment-form" class="space-y-6">
+                    <input type="hidden" id="payment-customer-id">
+                    
+                    <div>
+                        <label class="block text-gray-300 mb-2 font-medium">Payment Amount (₹)</label>
+                        <input type="number" id="payment-amount" required min="0"
+                               class="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-300 mb-2 font-medium">Payment Mode</label>
+                        <select id="payment-mode" required
+                               class="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <option value="">Select Payment Mode</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Bank Transfer">Bank Transfer</option>
+                            <option value="UPI">UPI</option>
+                            <option value="Cheque">Cheque</option>
+                            <option value="Credit">Credit</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-300 mb-2 font-medium">Reference/Note</label>
+                        <input type="text" id="payment-reference"
+                               class="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                               placeholder="Transaction ID, Cheque No., etc.">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-300 mb-2 font-medium">Payment Date</label>
+                        <input type="date" id="payment-date" required
+                               class="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                    </div>
+                    
+                    <div class="flex justify-end space-x-4 pt-4">
+                        <button type="button" id="cancel-payment-btn" class="px-6 py-3 border border-gray-700 text-gray-300 rounded-lg hover:bg-gray-800">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700">
+                            <i class="fas fa-save mr-2"></i>Save Payment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Dashboard Main Content -->
+        <div class="container mx-auto p-4">
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 font-medium">Total Customers</p>
+                            <h3 class="text-2xl font-bold text-gray-800" id="total-customers">0</h3>
+                        </div>
+                        <div class="bg-blue-100 p-3 rounded-full">
+                            <i class="fas fa-users text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 font-medium">Pending Payments</p>
+                            <h3 class="text-2xl font-bold text-gray-800" id="pending-payments">₹0</h3>
+                        </div>
+                        <div class="bg-red-100 p-3 rounded-full">
+                            <i class="fas fa-exclamation-circle text-red-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 font-medium">Today's Sales</p>
+                            <h3 class="text-2xl font-bold text-gray-800" id="today-sales">₹0</h3>
+                        </div>
+                        <div class="bg-green-100 p-3 rounded-full">
+                            <i class="fas fa-rupee-sign text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 font-medium">Overdue Payments</p>
+                            <h3 class="text-2xl font-bold text-gray-800" id="overdue-payments">₹0</h3>
+                        </div>
+                        <div class="bg-yellow-100 p-3 rounded-full">
+                            <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Left Column: Customer Form -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- Add Customer Form -->
+                    <div class="bg-white rounded-xl p-6 card-shadow">
+                        <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">
+                            <i class="fas fa-user-plus text-red-500 mr-2"></i>Add New Customer & Order
+                        </h2>
+                        
+                        <form id="customer-form" class="space-y-6">
+                            <!-- Customer Details -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-gray-700 mb-2 font-medium">Customer Name *</label>
+                                    <input type="text" id="customer-name" required 
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-gray-700 mb-2 font-medium">Mobile Number *</label>
+                                    <input type="tel" id="customer-phone" required 
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                           placeholder="10-digit number">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-700 mb-2 font-medium">Address *</label>
+                                <textarea id="customer-address" rows="2" required 
+                                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"></textarea>
+                            </div>
+                            
+                            <!-- Payment Details -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-gray-700 mb-2 font-medium">Payment Mode</label>
+                                    <select id="customer-payment-mode" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                                        <option value="Cash">Cash</option>
+                                        <option value="Credit">Credit</option>
+                                        <option value="Partial">Partial Payment</option>
+                                    </select>
+                                </div>
+                                
+                                <div id="advance-payment-container" class="hidden">
+                                    <label class="block text-gray-700 mb-2 font-medium">Advance Amount (₹)</label>
+                                    <input type="number" id="advance-payment" min="0"
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                                </div>
+                            </div>
+                            
+                            <!-- Order Items Section -->
+                            <div class="pt-6 border-t">
+                                <h3 class="text-xl font-bold mb-6 text-gray-800">Order Details</h3>
+                                
+                                <!-- Material Selection -->
+                                <div class="mb-6">
+                                    <label class="block text-gray-700 mb-3 font-medium">Select Material *</label>
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                        <button type="button" data-material="cement" class="material-btn bg-gray-100 border-2 border-gray-300 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-200">
+                                            <i class="fas fa-cube mr-2"></i>Cement
+                                        </button>
+                                        <button type="button" data-material="rods" class="material-btn bg-gray-100 border-2 border-gray-300 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-200">
+                                            <i class="fas fa-grip-lines mr-2"></i>Steel Rods
+                                        </button>
+                                        <button type="button" data-material="sand" class="material-btn bg-gray-100 border-2 border-gray-300 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-200">
+                                            <i class="fas fa-mountain mr-2"></i>Sand
+                                        </button>
+                                        <button type="button" data-material="stone-chips" class="material-btn bg-gray-100 border-2 border-gray-300 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-200">
+                                            <i class="fas fa-gem mr-2"></i>Stone Chips
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <!-- Material Details -->
+                                <div id="material-details" class="space-y-5 hidden">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                        <div>
+                                            <label class="block text-gray-700 mb-2 font-medium">Brand/Type</label>
+                                            <select id="material-brand" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                                            </select>
+                                        </div>
+                                        
+                                        <div>
+                                            <label class="block text-gray-700 mb-2 font-medium">Quantity</label>
+                                            <div class="flex">
+                                                <input type="number" id="material-quantity" min="1" value="1" 
+                                                       class="w-full px-4 py-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                                                <select id="material-unit" class="px-4 py-3 border border-l-0 border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-gray-700 mb-2 font-medium">Additional Notes</label>
+                                        <textarea id="order-notes" rows="2" 
+                                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"></textarea>
+                                    </div>
+                                </div>
+                                
+                                <!-- Add to Order Button -->
+                                <div id="add-to-order-btn" class="hidden">
+                                    <button type="button" id="add-item-btn" class="w-full btn-gradient text-white py-3 rounded-lg font-bold">
+                                        <i class="fas fa-cart-plus mr-2"></i>Add Item to Order
+                                    </button>
+                                </div>
+                                
+                                <!-- Order Items List -->
+                                <div id="order-items-container" class="mt-6 hidden">
+                                    <h4 class="font-bold text-gray-700 mb-3">Current Order Items</h4>
+                                    <div id="order-items-list" class="bg-gray-50 rounded-lg p-4 max-h-60 overflow-y-auto">
+                                    </div>
+                                    <div class="mt-4 flex justify-between items-center">
+                                        <div>
+                                            <span class="font-bold text-gray-700">Total Items: <span id="total-items">0</span></span>
+                                            <span class="ml-4 font-bold text-green-700">Order Total: ₹<span id="order-total">0</span></span>
+                                        </div>
+                                        <div>
+                                            <button type="button" id="clear-order-btn" class="text-red-600 hover:text-red-800 font-medium">
+                                                <i class="fas fa-trash mr-1"></i>Clear Order
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Submit Button -->
+                            <div class="pt-6 border-t">
+                                <button type="submit" id="submit-order-btn" class="w-full btn-gradient text-white py-4 rounded-lg font-bold text-lg">
+                                    <i class="fas fa-check-circle mr-2"></i>Save Customer & Order
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Recent Orders -->
+                    <div class="bg-white rounded-xl p-6 card-shadow">
+                        <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">
+                            <i class="fas fa-history text-red-500 mr-2"></i>Recent Orders
+                        </h2>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="py-3 px-4 text-left text-gray-700">Customer</th>
+                                        <th class="py-3 px-4 text-left text-gray-700">Amount</th>
+                                        <th class="py-3 px-4 text-left text-gray-700">Payment</th>
+                                        <th class="py-3 px-4 text-left text-gray-700">Date</th>
+                                        <th class="py-3 px-4 text-left text-gray-700">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-orders-table">
+                                    <tr>
+                                        <td colspan="5" class="py-8 text-center text-gray-500">
+                                            No orders yet. Add your first customer order above.
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column: Quick Actions & Customers -->
+                <div class="space-y-6">
+                    <!-- Quick Stats -->
+                    <div class="bg-white rounded-xl p-6 card-shadow">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-3">
+                            <i class="fas fa-chart-bar text-red-500 mr-2"></i>Quick Overview
+                        </h2>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Total Revenue</span>
+                                <span class="font-bold text-green-700" id="total-revenue">₹0</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Today's Collections</span>
+                                <span class="font-bold text-blue-700" id="today-collections">₹0</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Credit Sales</span>
+                                <span class="font-bold text-yellow-700" id="credit-sales">₹0</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Customers -->
+                    <div class="bg-white rounded-xl p-6 card-shadow">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-3">
+                            <i class="fas fa-users text-red-500 mr-2"></i>Recent Customers
+                        </h2>
+                        <div id="customers-list" class="space-y-4 max-h-96 overflow-y-auto scrollbar-hide">
+                            <div class="text-center py-6 text-gray-500">
+                                <i class="fas fa-user-circle text-4xl mb-2"></i>
+                                <p>No customers added yet</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="bg-white rounded-xl p-6 card-shadow">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-3">
+                            <i class="fas fa-bolt text-red-500 mr-2"></i>Quick Actions
+                        </h2>
+                        <div class="space-y-3">
+                            <button id="export-all-excel" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-medium">
+                                <i class="fas fa-file-excel mr-2"></i>Export All Data
+                            </button>
+                            <button id="export-daily-sales" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium">
+                                <i class="fas fa-calendar-day mr-2"></i>Daily Sales Report
+                            </button>
+                            <button id="export-pending-payments" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-3 rounded-lg font-medium">
+                                <i class="fas fa-exclamation-circle mr-2"></i>Pending Payments
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div id="success-toast" class="fixed bottom-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-y-full transition-transform duration-300">
+        <div class="flex items-center">
+            <i class="fas fa-check-circle mr-3 text-xl"></i>
+            <span id="toast-message">Operation completed successfully!</span>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl p-8 flex flex-col items-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-700 mb-4"></div>
+            <p class="text-gray-800 font-medium">Processing...</p>
+        </div>
+    </div>
+
+    <script>
+        // Constants
+        const STORE_USERS_KEY = 'buildpro_store_users';
+        const CURRENT_USER_KEY = 'buildpro_current_user';
+        const CUSTOMERS_KEY = 'buildpro_customers';
+        const ORDERS_KEY = 'buildpro_orders';
+        const PAYMENTS_KEY = 'buildpro_payments';
+        const DAILY_SALES_KEY = 'buildpro_daily_sales';
+        
+        let currentUser = null;
+        let orderItems = [];
+        let orderTotal = 0;
+        let selectedCustomerId = null;
+        
+        // Initialize Dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check authentication
+            currentUser = JSON.parse(localStorage.getItem(CURRENT_USER_KEY));
+            if (!currentUser) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Set current date
+            const now = new Date();
+            document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            // Initialize components
+            setupDashboard();
+            setupMaterialButtons();
+            setupOrderForm();
+            setupSearchSystem();
+            setupPaymentSystem();
+            
+            // Load data
+            loadDataFromStorage();
+            updateStats();
+        });
+        
+        function setupDashboard() {
+            // Logout button
+            document.getElementById('logout-btn').addEventListener('click', function() {
+                if (confirm('Are you sure you want to logout?')) {
+                    localStorage.removeItem(CURRENT_USER_KEY);
+                    window.location.href = 'index.html';
+                }
+            });
+            
+            // Export Excel button
+            document.getElementById('export-excel-btn').addEventListener('click', exportAllDataToExcel);
+            document.getElementById('export-all-excel').addEventListener('click', exportAllDataToExcel);
+            document.getElementById('export-daily-sales').addEventListener('click', exportDailySalesReport);
+            document.getElementById('export-pending-payments').addEventListener('click', exportPendingPaymentsReport);
+            
+            // Customer search button
+            document.getElementById('customer-search-btn').addEventListener('click', function() {
+                document.getElementById('search-modal').classList.remove('hidden');
+            });
+            
+            // Close search modal
+            document.getElementById('close-search-modal').addEventListener('click', function() {
+                document.getElementById('search-modal').classList.add('hidden');
+            });
+            
+            // Close modal when clicking outside
+            document.getElementById('search-modal').addEventListener('click', function(event) {
+                if (event.target === this) {
+                    this.classList.add('hidden');
+                }
+            });
+            
+            // Payment mode change handler
+            document.getElementById('customer-payment-mode').addEventListener('change', function() {
+                const container = document.getElementById('advance-payment-container');
+                if (this.value === 'Partial') {
+                    container.classList.remove('hidden');
+                } else {
+                    container.classList.add('hidden');
+                }
+            });
+        }
+        
+        function setupMaterialButtons() {
+            const materialButtons = document.querySelectorAll('.material-btn');
+            const materialDetails = document.getElementById('material-details');
+            const addToOrderBtn = document.getElementById('add-to-order-btn');
+            const materialBrand = document.getElementById('material-brand');
+            const materialUnit = document.getElementById('material-unit');
+            
+            const materialOptions = {
+                'cement': {
+                    brands: ['UltraTech Cement', 'ACC Cement', 'Ambuja Cement', 'Shree Cement', 'Birla Cement'],
+                    units: ['Bags']
+                },
+                'rods': {
+                    brands: ['6mm', '8mm'],
+                    units: ['Pieces']
+                },
+                'sand': {
+                    brands: ['River Sand', 'Pit Sand', 'Construction Sand'],
+                    units: ['Trailers']
+                },
+                'stone-chips': {
+                    brands: ['10mm Aggregate', '20mm Aggregate', 'Crushed Stone'],
+                    units: ['Trailers']
+                }
+            };
+            
+            materialButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    materialButtons.forEach(btn => {
+                        btn.classList.remove('bg-red-600', 'text-white', 'border-red-700');
+                        btn.classList.add('bg-gray-100', 'text-gray-800', 'border-gray-300');
+                    });
+                    
+                    this.classList.remove('bg-gray-100', 'text-gray-800', 'border-gray-300');
+                    this.classList.add('bg-red-600', 'text-white', 'border-red-700');
+                    
+                    const material = this.getAttribute('data-material');
+                    
+                    materialBrand.innerHTML = '';
+                    materialOptions[material].brands.forEach(brand => {
+                        const option = document.createElement('option');
+                        option.value = brand;
+                        option.textContent = brand;
+                        materialBrand.appendChild(option);
+                    });
+                    
+                    materialUnit.innerHTML = '';
+                    materialOptions[material].units.forEach(unit => {
+                        const option = document.createElement('option');
+                        option.value = unit;
+                        option.textContent = unit;
+                        materialUnit.appendChild(option);
+                    });
+                    
+                    materialDetails.classList.remove('hidden');
+                    addToOrderBtn.classList.remove('hidden');
+                });
+            });
+        }
+        
+        function setupOrderForm() {
+            const customerForm = document.getElementById('customer-form');
+            const addItemBtn = document.getElementById('add-item-btn');
+            const orderItemsList = document.getElementById('order-items-list');
+            const clearOrderBtn = document.getElementById('clear-order-btn');
+            const orderItemsContainer = document.getElementById('order-items-container');
+            const totalItemsSpan = document.getElementById('total-items');
+            const orderTotalSpan = document.getElementById('order-total');
+            
+            // Add item to order
+            addItemBtn.addEventListener('click', function() {
+                const selectedMaterial = getSelectedMaterial();
+                
+                if (!selectedMaterial) {
+                    alert('Please select a material first');
+                    return;
+                }
+                
+                const brand = document.getElementById('material-brand').value;
+                const quantity = parseInt(document.getElementById('material-quantity').value) || 0;
+                const unit = document.getElementById('material-unit').value;
+                const notes = document.getElementById('order-notes').value;
+                const price = getMaterialPrice(selectedMaterial, brand);
+                const itemTotal = price * quantity;
+                
+                if (quantity <= 0) {
+                    alert('Please enter a valid quantity');
+                    return;
+                }
+                
+                if (price <= 0) {
+                    alert('Please set price for this material first');
+                    return;
+                }
+                
+                const item = {
+                    id: Date.now(),
+                    material: selectedMaterial,
+                    brand: brand,
+                    quantity: quantity,
+                    unit: unit,
+                    price: price,
+                    total: itemTotal,
+                    notes: notes
+                };
+                
+                orderItems.push(item);
+                orderTotal += itemTotal;
+                updateOrderItemsDisplay();
+                
+                document.getElementById('material-quantity').value = 1;
+                document.getElementById('order-notes').value = '';
+                
+                showToast('Item added to order');
+            });
+            
+            // Update order items display
+            function updateOrderItemsDisplay() {
+                orderItemsList.innerHTML = '';
+                
+                if (orderItems.length === 0) {
+                    orderItemsContainer.classList.add('hidden');
+                    totalItemsSpan.textContent = '0';
+                    orderTotalSpan.textContent = '0';
+                    return;
+                }
+                
+                orderItemsContainer.classList.remove('hidden');
+                totalItemsSpan.textContent = orderItems.length;
+                orderTotalSpan.textContent = orderTotal;
+                
+                orderItems.forEach((item, index) => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'flex justify-between items-center border-b border-gray-200 py-3 last:border-0';
+                    itemElement.innerHTML = `
+                        <div>
+                            <h5 class="font-medium text-gray-800">${item.material.charAt(0).toUpperCase() + item.material.slice(1)} - ${item.brand}</h5>
+                            <p class="text-sm text-gray-600">${item.quantity} ${item.unit} @ ₹${item.price}/${item.unit === 'Bags' ? 'bag' : item.unit === 'Pieces' ? 'piece' : 'trailer'}</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-green-700">₹${item.total}</div>
+                            <button class="text-red-500 hover:text-red-700 text-sm remove-item-btn mt-1" data-index="${index}">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `;
+                    orderItemsList.appendChild(itemElement);
+                });
+                
+                // Add event listeners to remove buttons
+                document.querySelectorAll('.remove-item-btn').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        orderTotal -= orderItems[index].total;
+                        orderItems.splice(index, 1);
+                        updateOrderItemsDisplay();
+                    });
+                });
+            }
+            
+            // Clear order
+            clearOrderBtn.addEventListener('click', function() {
+                if (orderItems.length > 0 && confirm('Are you sure you want to clear all items from this order?')) {
+                    orderItems = [];
+                    orderTotal = 0;
+                    updateOrderItemsDisplay();
+                    showToast('Order cleared');
+                }
+            });
+            
+            // Submit customer and order
+            customerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (orderItems.length === 0) {
+                    alert('Please add at least one item to the order');
+                    return;
+                }
+                
+                const customerName = document.getElementById('customer-name').value.trim();
+                const customerPhone = document.getElementById('customer-phone').value.trim();
+                const customerAddress = document.getElementById('customer-address').value.trim();
+                const paymentMode = document.getElementById('customer-payment-mode').value;
+                const advancePayment = parseFloat(document.getElementById('advance-payment').value) || 0;
+                
+                if (!customerName || !customerPhone || !customerAddress) {
+                    alert('Please fill in all customer details');
+                    return;
+                }
+                
+                if (!/^\d{10}$/.test(customerPhone)) {
+                    alert('Please enter a valid 10-digit mobile number');
+                    return;
+                }
+                
+                // Check if customer already exists
+                const existingCustomers = JSON.parse(localStorage.getItem(CUSTOMERS_KEY)) || [];
+                const existingCustomer = existingCustomers.find(c => c.phone === customerPhone);
+                
+                let customerId;
+                let isNewCustomer = false;
+                
+                if (existingCustomer) {
+                    customerId = existingCustomer.id;
+                    // Update customer information if needed
+                    existingCustomer.name = customerName;
+                    existingCustomer.address = customerAddress;
+                    existingCustomer.lastPurchaseDate = new Date().toISOString();
+                    localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(existingCustomers));
+                } else {
+                    // Create new customer
+                    isNewCustomer = true;
+                    customerId = Date.now();
+                    const customer = {
+                        id: customerId,
+                        name: customerName,
+                        phone: customerPhone,
+                        address: customerAddress,
+                        createdAt: new Date().toISOString(),
+                        lastPurchaseDate: new Date().toISOString(),
+                        totalPurchases: 0,
+                        totalAmount: 0,
+                        totalPaid: 0,
+                        balance: 0
+                    };
+                    
+                    existingCustomers.push(customer);
+                    localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(existingCustomers));
+                }
+                
+                // Create order
+                const orderId = Date.now();
+                const order = {
+                    orderId: orderId,
+                    customerId: customerId,
+                    customerName: customerName,
+                    customerPhone: customerPhone,
+                    items: [...orderItems],
+                    totalAmount: orderTotal,
+                    paymentMode: paymentMode,
+                    advancePayment: advancePayment,
+                    balance: orderTotal - advancePayment,
+                    date: new Date().toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }),
+                    timestamp: new Date().toISOString(),
+                    status: advancePayment >= orderTotal ? 'Paid' : (advancePayment > 0 ? 'Partial' : 'Pending')
+                };
+                
+                // Save order
+                saveOrder(order);
+                
+                // Save payment record if advance payment was made
+                if (advancePayment > 0) {
+                    const payment = {
+                        id: Date.now(),
+                        customerId: customerId,
+                        orderId: orderId,
+                        amount: advancePayment,
+                        paymentMode: 'Cash', // Default for advance
+                        reference: 'Advance Payment',
+                        date: new Date().toISOString(),
+                        type: 'advance'
+                    };
+                    savePayment(payment);
+                }
+                
+                // Update customer financials
+                updateCustomerFinancials(customerId, orderTotal, advancePayment);
+                
+                // Update daily sales
+                updateDailySales(orderTotal, advancePayment);
+                
+                // Reset form
+                customerForm.reset();
+                orderItems = [];
+                orderTotal = 0;
+                updateOrderItemsDisplay();
+                
+                // Reset material selection
+                document.querySelectorAll('.material-btn').forEach(btn => {
+                    btn.classList.remove('bg-red-600', 'text-white', 'border-red-700');
+                    btn.classList.add('bg-gray-100', 'text-gray-800', 'border-gray-300');
+                });
+                document.getElementById('material-details').classList.add('hidden');
+                document.getElementById('add-to-order-btn').classList.add('hidden');
+                document.getElementById('advance-payment-container').classList.add('hidden');
+                
+                // Update UI
+                updateStats();
+                loadDataFromStorage();
+                
+                showToast(`Order saved successfully! ${isNewCustomer ? 'New customer added.' : 'Customer updated.'}`);
+            });
+        }
+        
+        function setupSearchSystem() {
+            const performSearchBtn = document.getElementById('perform-search-btn');
+            const searchName = document.getElementById('search-name');
+            const searchPhone = document.getElementById('search-phone');
+            
+            performSearchBtn.addEventListener('click', function() {
+                const name = searchName.value.trim();
+                const phone = searchPhone.value.trim();
+                
+                if (!name && !phone) {
+                    alert('Please enter either name or phone number to search');
+                    return;
+                }
+                
+                const customers = JSON.parse(localStorage.getItem(CUSTOMERS_KEY)) || [];
+                const orders = JSON.parse(localStorage.getItem(ORDERS_KEY)) || [];
+                const payments = JSON.parse(localStorage.getItem(PAYMENTS_KEY)) || [];
+                
+                let results = [];
+                
+                if (name) {
+                    results = customers.filter(c => 
+                        c.name.toLowerCase().includes(name.toLowerCase())
+                    );
+                }
+                
+                if (phone) {
+                    results = customers.filter(c => 
+                        c.phone.includes(phone)
+                    );
+                }
+                
+                displaySearchResults(results, orders, payments);
+            });
+            
+            // Search on Enter key
+            searchName.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') performSearchBtn.click();
+            });
+            
+            searchPhone.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') performSearchBtn.click();
+            });
+        }
+        
+        function displaySearchResults(results, orders, payments) {
+            const resultsList = document.getElementById('search-results-list');
+            const searchResults = document.getElementById('search-results');
+            const customerDetails = document.getElementById('customer-details');
+            
+            resultsList.innerHTML = '';
+            
+            if (results.length === 0) {
+                resultsList.innerHTML = `
+                    <div class="bg-gray-800 rounded-xl p-6 text-center">
+                        <i class="fas fa-user-slash text-4xl text-gray-600 mb-4"></i>
+                        <p class="text-gray-300">No customers found</p>
+                    </div>
+                `;
+                searchResults.classList.remove('hidden');
+                customerDetails.classList.add('hidden');
+                return;
+            }
+            
+            searchResults.classList.remove('hidden');
+            customerDetails.classList.add('hidden');
+            
+            results.forEach(customer => {
+                const customerOrders = orders.filter(o => o.customerId === customer.id);
+                const totalOrders = customerOrders.length;
+                const totalSpent = customerOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+                const balance = customer.balance || 0;
+                
+                const resultElement = document.createElement('div');
+                resultElement.className = 'bg-gray-800 rounded-xl p-4 hover:bg-gray-700 cursor-pointer transition';
+                resultElement.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="customer-avatar bg-red-600 mr-4">
+                                ${customer.name.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white">${customer.name}</h4>
+                                <p class="text-gray-400 text-sm">${customer.phone}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-white font-bold">₹${totalSpent.toLocaleString()}</div>
+                            <div class="text-sm ${balance > 0 ? 'text-red-400' : 'text-green-400'}">
+                                Balance: ₹${balance.toLocaleString()}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                resultElement.addEventListener('click', function() {
+                    displayCustomerDetails(customer, orders, payments);
+                });
+                
+                resultsList.appendChild(resultElement);
+            });
+        }
+        
+        function displayCustomerDetails(customer, orders, payments) {
+            selectedCustomerId = customer.id;
+            
+            const customerDetails = document.getElementById('customer-details');
+            const searchResults = document.getElementById('search-results');
+            const customerName = document.getElementById('selected-customer-name');
+            const customerInfo = document.getElementById('customer-info');
+            const financialSummary = document.getElementById('financial-summary');
+            const paymentHistoryTable = document.getElementById('payment-history-table');
+            const purchaseHistory = document.getElementById('purchase-history');
+            
+            customerDetails.classList.remove('hidden');
+            searchResults.classList.add('hidden');
+            
+            // Set customer name
+            customerName.textContent = customer.name;
+            
+            // Set customer info
+            customerInfo.innerHTML = `
+                <div class="flex items-center mb-3">
+                    <i class="fas fa-phone text-red-400 mr-3"></i>
+                    <span class="text-gray-300">${customer.phone}</span>
+                </div>
+                <div class="flex items-start mb-3">
+                    <i class="fas fa-map-marker-alt text-red-400 mr-3 mt-1"></i>
+                    <span class="text-gray-300">${customer.address}</span>
+                </div>
+                <div class="flex items-center mb-3">
+                    <i class="fas fa-calendar-alt text-red-400 mr-3"></i>
+                    <span class="text-gray-300">Customer Since: ${new Date(customer.createdAt).toLocaleDateString()}</span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-shopping-cart text-red-400 mr-3"></i>
+                    <span class="text-gray-300">Total Orders: ${customer.totalPurchases || 0}</span>
+                </div>
+            `;
+            
+            // Set financial summary
+            const customerOrders = orders.filter(o => o.customerId === customer.id);
+            const customerPayments = payments.filter(p => p.customerId === customer.id);
+            const totalSpent = customerOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+            const totalPaid = customerPayments.reduce((sum, payment) => sum + payment.amount, 0);
+            const balance = totalSpent - totalPaid;
+            
+            financialSummary.innerHTML = `
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-gray-300">Total Purchases:</span>
+                    <span class="font-bold text-white">₹${totalSpent.toLocaleString()}</span>
+                </div>
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-gray-300">Total Paid:</span>
+                    <span class="font-bold text-green-400">₹${totalPaid.toLocaleString()}</span>
+                </div>
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-gray-300">Balance Due:</span>
+                    <span class="font-bold ${balance > 0 ? 'text-red-400' : 'text-green-400'}">₹${balance.toLocaleString()}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-300">Last Purchase:</span>
+                    <span class="text-gray-300">${customer.lastPurchaseDate ? new Date(customer.lastPurchaseDate).toLocaleDateString() : 'Never'}</span>
+                </div>
+            `;
+            
+            // Set payment history
+            paymentHistoryTable.innerHTML = '';
+            if (customerPayments.length === 0) {
+                paymentHistoryTable.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="py-8 text-center text-gray-500">
+                            No payment records found
+                        </td>
+                    </tr>
+                `;
+            } else {
+                customerPayments.forEach(payment => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-gray-700';
+                    row.innerHTML = `
+                        <td class="py-3 px-4 text-gray-300">${new Date(payment.date).toLocaleDateString()}</td>
+                        <td class="py-3 px-4 text-gray-300">₹${payment.amount}</td>
+                        <td class="py-3 px-4 text-gray-300">${payment.paymentMode}</td>
+                        <td class="py-3 px-4 text-gray-300">${payment.reference || '-'}</td>
+                        <td class="py-3 px-4">
+                            <span class="px-3 py-1 rounded-full text-xs font-medium status-paid">Paid</span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <button class="text-red-400 hover:text-red-300" onclick="deletePayment(${payment.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    paymentHistoryTable.appendChild(row);
+                });
+            }
+            
+            // Set purchase history
+            purchaseHistory.innerHTML = '';
+            if (customerOrders.length === 0) {
+                purchaseHistory.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-shopping-cart text-4xl mb-4"></i>
+                        <p>No purchase history found</p>
+                    </div>
+                `;
+            } else {
+                customerOrders.forEach(order => {
+                    const orderElement = document.createElement('div');
+                    orderElement.className = 'bg-gray-900 rounded-xl p-4';
+                    orderElement.innerHTML = `
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h5 class="font-bold text-white">Order #${order.orderId}</h5>
+                                <p class="text-gray-400 text-sm">${order.date}</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-white font-bold">₹${order.totalAmount}</div>
+                                <div class="text-sm ${order.balance > 0 ? 'text-red-400' : 'text-green-400'}">
+                                    ${order.balance > 0 ? `Balance: ₹${order.balance}` : 'Fully Paid'}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            ${order.items.map(item => `
+                                <div class="flex justify-between items-center text-gray-300">
+                                    <span>${item.quantity} ${item.unit} ${item.material} (${item.brand})</span>
+                                    <span>₹${item.total}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-gray-700 flex justify-between items-center">
+                            <span class="text-gray-400">Payment: ${order.paymentMode}</span>
+                            <span class="text-gray-400">Advance: ₹${order.advancePayment || 0}</span>
+                        </div>
+                    `;
+                    purchaseHistory.appendChild(orderElement);
+                });
+            }
+            
+            // Set up export customer Excel button
+            document.getElementById('export-customer-excel').addEventListener('click', function() {
+                exportCustomerExcel(customer, customerOrders, customerPayments);
+            });
+            
+            // Set up add payment button
+            document.getElementById('add-payment-btn').addEventListener('click', function() {
+                openPaymentModal(customer.id);
+            });
+            
+            document.getElementById('add-new-payment-btn').addEventListener('click', function() {
+                openPaymentModal(customer.id);
+            });
+        }
+        
+        function setupPaymentSystem() {
+            const paymentModal = document.getElementById('payment-modal');
+            const closePaymentModal = document.getElementById('close-payment-modal');
+            const cancelPaymentBtn = document.getElementById('cancel-payment-btn');
+            const paymentForm = document.getElementById('payment-form');
+            
+            // Close payment modal
+            closePaymentModal.addEventListener('click', function() {
+                paymentModal.classList.add('hidden');
+            });
+            
+            cancelPaymentBtn.addEventListener('click', function() {
+                paymentModal.classList.add('hidden');
+            });
+            
+            // Close modal when clicking outside
+            paymentModal.addEventListener('click', function(event) {
+                if (event.target === this) {
+                    this.classList.add('hidden');
+                }
+            });
+            
+            // Set today's date as default
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('payment-date').value = today;
+            
+            // Handle payment form submission
+            paymentForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const amount = parseFloat(document.getElementById('payment-amount').value);
+                const paymentMode = document.getElementById('payment-mode').value;
+                const reference = document.getElementById('payment-reference').value;
+                const date = document.getElementById('payment-date').value;
+                const customerId = selectedCustomerId;
+                
+                if (!amount || amount <= 0) {
+                    alert('Please enter a valid payment amount');
+                    return;
+                }
+                
+                if (!paymentMode) {
+                    alert('Please select a payment mode');
+                    return;
+                }
+                
+                // Create payment record
+                const payment = {
+                    id: Date.now(),
+                    customerId: customerId,
+                    amount: amount,
+                    paymentMode: paymentMode,
+                    reference: reference,
+                    date: new Date(date).toISOString(),
+                    timestamp: new Date().toISOString(),
+                    type: 'payment'
+                };
+                
+                // Save payment
+                savePayment(payment);
+                
+                // Update customer financials
+                updateCustomerFinancials(customerId, 0, amount); // 0 for new purchases, amount for payment
+                
+                // Close modal
+                paymentModal.classList.add('hidden');
+                
+                // Reset form
+                paymentForm.reset();
+                document.getElementById('payment-date').value = today;
+                
+                // Refresh customer details
+                const customers = JSON.parse(localStorage.getItem(CUSTOMERS_KEY)) || [];
+                const orders = JSON.parse(localStorage.getItem(ORDERS_KEY)) || [];
+                const payments = JSON.parse(localStorage.getItem(PAYMENTS_KEY)) || [];
+                const customer = customers.find(c => c.id === customerId);
+                
+                if (customer) {
+                    displayCustomerDetails(customer, orders, payments);
+                }
+                
+                // Update stats
+                updateStats();
+                
+                showToast('Payment recorded successfully!');
+            });
+        }
+        
+        function openPaymentModal(customerId) {
+            document.getElementById('payment-customer-id').value = customerId;
+            document.getElementById('payment-modal').classList.remove('hidden');
+            
+            // Get customer balance
+            const customers = JSON.parse(localStorage.getItem(CUSTOMERS_KEY)) || [];
+            const customer = customers.find(c => c.id === customerId);
+            
+            if (customer && customer.balance > 0) {
+                document.getElementById('payment-amount').placeholder = `Balance: ₹${customer.balance}`;
+            }
+        }
+        
+        // Helper Functions
+        function getSelectedMaterial() {
+            const materialButtons = document.querySelectorAll('.material-btn');
+            let selectedMaterial = '';
+            materialButtons.forEach(button => {
+                if (button.classList.contains('bg-red-600')) {
+                    selectedMaterial = button.getAttribute('data-material');
+                }
+            });
+            return selectedMaterial;
+        }
+        
+        function getMaterialPrice(material, brand) {
+            if (!currentUser || !currentUser.pricing) return 0;
+            
+            switch(material) {
+                case 'cement':
+                    return currentUser.pricing.cement[brand] || 0;
+                case 'rods':
+                    return currentUser.pricing.rods[brand] || 0;
+                case 'sand':
+                    return currentUser.pricing.sand[brand] || 0;
+                case 'stone-chips':
+                    return currentUser.pricing.stoneChips[brand] || 0;
+                default:
+                    return 0;
+            }
+        }
+        
+        function saveOrder(order) {
+            let orders = JSON.parse(localStorage.getItem(ORDERS_KEY)) || [];
+            orders.push(order);
+            localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+        }
+        
+        function savePayment(payment) {
+            let payments = JSON.parse(localStorage.getItem(PAYMENTS_KEY)) || [];
+            payments.push(payment);
+            localStorage.setItem(PAYMENTS_KEY, JSON.stringify(payments));
+        }
+        
+        function updateCustomerFinancials(customerId, purchaseAmount, paymentAmount) {
+            const customers = JSON.parse(localStorage.getItem(CUSTOMERS_KEY)) || [];
+            const customerIndex = customers.findIndex(c => c.id === customerId);
+            
+            if (customerIndex !== -1) {
+                const customer = customers[customerIndex];
+                
+                // Update purchase info
+                if (purchaseAmount > 0) {
+                    customer.totalPurchases = (customer.totalPurchases || 0) + 1;
+                    customer.totalAmount = (customer.totalAmount || 0) + purchaseAmount;
+                    customer.lastPurchaseDate = new Date().toISOString();
+                }
+                
+                // Update payment info
+                if (paymentAmount > 0) {
+                    customer.totalPaid = (customer.totalPaid || 0) + paymentAmount;
+                }
+                
+                // Calculate balance
+                customer.balance = (customer.totalAmount || 0) - (customer.totalPaid || 0);
+                
+                customers[customerIndex] = customer;
+                localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(customers));
+            }
+        }
+        
+        function updateDailySales(totalAmount, advanceAmount) {
+            const today = new Date().toISOString().split('T')[0];
+            let dailySales = JSON.parse(localStorage.getItem(DAILY_SALES_KEY)) || {};
+            
+            if (!dailySales[today]) {
+                dailySales[today] = {
+                    date: today,
+                    totalSales: 0,
+                    totalCollections: 0,
+                    creditSales: 0,
+                    ordersCount: 0
+                };
+            }
+            
+            dailySales[today].totalSales += totalAmount;
+            dailySales[today].totalCollections += advanceAmount;
+            dailySales[today].ordersCount += 1;
+            
+            if (advanceAmount < totalAmount) {
+                dailySales[today].creditSales += (totalAmount - advanceAmount);
+            }
+            
+            localStorage.setItem(DAILY_SALES_KEY, JSON.stringify(dailySales));
+        }
+        
+        function loadDataFromStorage() {
+            const customers = JSON.parse(localStorage.getItem(CUSTOMERS_KEY)) || [];
+            const orders = JSON.parse(localStorage.getItem(ORDERS_KEY)) || [];
+            
+            // Update customers list
+            const customersList = document.getElementById('customers-list');
+            if (customers.length === 0) {
+                customersList.innerHTML = `
+                    <div class="text-center py-6 text-gray-500">
+                        <i class="fas fa-user-circle text-4xl mb-2"></i>
+                        <p>No customers added yet</p>
+                    </div>
+                `;
+            } else {
+                customersList.innerHTML = '';
+                customers.slice(-5).reverse().forEach(customer => {
+                    const customerElement = document.createElement('div');
+                    customerElement.className = 'flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer';
+                    customerElement.innerHTML = `
+                        <div class="bg-red-100 text-red-800 rounded-full w-10 h-10 flex items-center justify-center mr-3">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h4 class="font-medium text-gray-800">${customer.name}</h4>
+                            <p class="text-sm text-gray-600">${customer.phone}</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm font-medium ${customer.balance > 0 ? 'text-red-600' : 'text-green-600'}">
+                                ₹${customer.balance || 0}
+                            </div>
+                        </div>
+                    `;
+                    
+                    customerElement.addEventListener('click', function() {
+                        const payments = JSON.parse(localStorage.getItem(PAYMENTS_KEY)) || [];
+                        displayCustomerDetails(customer, orders, payments);
+                        document.getElementById('search-modal').classList.remove('hidden');
+                    });
+                    
+                    customersList.appendChild(customerElement);
+                });
+            }
+            
+            // Update recent orders table
+            const recentOrdersTable = document.getElementById('recent-orders-table');
+            if (orders.length === 0) {
+                recentOrdersTable.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="py-8 text-center text-gray-500">
+                            No orders yet. Add your first customer order above.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                recentOrdersTable.innerHTML = '';
+                orders.slice(-5).reverse().forEach(order => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-gray-100 hover:bg-gray-50';
+                    
+                    let statusBadge = '';
+                    if (order.balance <= 0) {
+                        statusBadge = '<span class="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">Paid</span>';
+                    } else if (order.advancePayment > 0) {
+                        statusBadge = '<span class="px-2 py-1 rounded-full text-xs bg-yellow-100 text-yellow-800">Partial</span>';
+                    } else {
+                        statusBadge = '<span class="px-2 py-1 rounded-full text-xs bg-red-100 text-red-800">Pending</span>';
+                    }
+                    
+                    row.innerHTML = `
+                        <td class="py-3 px-4">
+                            <div class="font-medium text-gray-800">${order.customerName}</div>
+                            <div class="text-sm text-gray-600">${order.customerPhone}</div>
+                        </td>
+                        <td class="py-3 px-4 font-medium">₹${order.totalAmount}</td>
+                        <td class="py-3 px-4">${order.paymentMode}</td>
+                        <td class="py-3 px-4 text-sm">${order.date}</td>
+                        <td class="py-3 px-4">${statusBadge}</td>
+                    `;
+                    recentOrdersTable.appendChild(row);
+                });
+            }
+        }
+        
+        function updateStats() {
+            const customers = JSON.parse(localStorage.getItem(CUSTOMERS_KEY)) || [];
+            const orders = JSON.parse(localStorage.getItem(ORDERS_KEY)) || [];
+            const payments = JSON.parse(localStorage.getItem(PAYMENTS_KEY)) || [];
+            
+            // Today's date
+            const today = new Date().toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric'
+            });
+            
+            // Calculate stats
+            let totalCustomers = customers.length;
+            let totalRevenue = 0;
+            let pendingPayments = 0;
+            let overduePayments = 0;
+            let todaySales = 0;
+            let todayCollections = 0;
+            let creditSales = 0;
+            
+            // Calculate from orders
+            orders.forEach(order => {
+                totalRevenue += order.totalAmount;
+                
+                if (order.date.includes(today)) {
+                    todaySales += order.totalAmount;
+                }
+                
+                if (order.balance > 0) {
+                    pendingPayments += order.balance;
+                    
+                    // Check if overdue (older than 30 days)
+                    const orderDate = new Date(order.timestamp);
+                    const daysDiff = Math.floor((new Date() - orderDate) / (1000 * 60 * 60 * 24));
+                    if (daysDiff > 30) {
+                        overduePayments += order.balance;
+                    }
+                }
+            });
+            
+            // Calculate from payments
+            payments.forEach(payment => {
+                const paymentDate = new Date(payment.date);
+                if (paymentDate.toLocaleDateString() === new Date().toLocaleDateString()) {
+                    todayCollections += payment.amount;
+                }
+            });
+            
+            // Update display
+            document.getElementById('total-customers').textContent = totalCustomers;
+            document.getElementById('total-revenue').textContent = '₹' + totalRevenue.toLocaleString();
+            document.getElementById('pending-payments').textContent = '₹' + pendingPayments.toLocaleString();
+            document.getElementById('overdue-payments').textContent = '₹' + overduePayments.toLocaleString();
+            document.getElementById('today-sales').textContent = '₹' + todaySales.toLocaleString();
+            document.getElementById('today-collections').textContent = '₹' + todayCollections.toLocaleString();
+            document.getElementById('credit-sales').textContent = '₹' + pendingPayments.toLocaleString();
+        }
+        
+        // Export Functions
+        function exportAllDataToExcel() {
+            const customers = JSON.parse(localStorage.getItem(CUSTOMERS_KEY)) || [];
+            const orders = JSON.parse(localStorage.getItem(ORDERS_KEY)) || [];
+            const payments = JSON.parse(localStorage.getItem(PAYMENTS_KEY)) || [];
+            const dailySales = JSON.parse(localStorage.getItem(DAILY_SALES_KEY)) || {};
+            
+            if (customers.length === 0 && orders.length === 0) {
+                alert('No data to export');
+                return;
+            }
+            
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            
+            // 1. Customer Master Sheet
+            const customerData = customers.map(customer => [
+                customer.id,
+                customer.name,
+                customer.phone,
+                customer.address,
+                new Date(customer.createdAt).toLocaleDateString(),
+                new Date(customer.lastPurchaseDate).toLocaleDateString(),
+                customer.totalPurchases || 0,
+                customer.totalAmount || 0,
+                customer.totalPaid || 0,
+                customer.balance || 0
+            ]);
+            
+            customerData.unshift([
+                'Customer ID', 'Name', 'Phone', 'Address', 'Joined Date', 
+                'Last Purchase', 'Total Orders', 'Total Amount', 'Total Paid', 'Balance'
+            ]);
+            
+            // 2. Order Details Sheet
+            const orderData = [];
+            orders.forEach(order => {
+                order.items.forEach(item => {
+                    orderData.push([
+                        order.orderId,
+                        order.customerId,
+                        order.customerName,
+                        order.customerPhone,
+                        item.material,
+                        item.brand,
+                        item.quantity,
+                        item.unit,
+                        item.price,
+                        item.total,
+                        order.totalAmount,
+                        order.advancePayment || 0,
+                        order.balance || 0,
+                        order.paymentMode,
+                        order.date,
+                        order.status
+                    ]);
+                });
+            });
+            
+            orderData.unshift([
+                'Order ID', 'Customer ID', 'Customer Name', 'Customer Phone',
+                'Material', 'Brand', 'Quantity', 'Unit', 'Unit Price', 'Item Total',
+                'Order Total', 'Advance Paid', 'Balance', 'Payment Mode', 'Order Date', 'Status'
+            ]);
+            
+            // 3. Payment History Sheet
+            const paymentData = payments.map(payment => [
+                payment.id,
+                payment.customerId,
+                getCustomerName(payment.customerId),
+                payment.amount,
+                payment.paymentMode,
+                payment.reference || '',
+                new Date(payment.date).toLocaleDateString(),
+                payment.type
+            ]);
+            
+            paymentData.unshift([
+                'Payment ID', 'Customer ID', 'Customer Name', 'Amount', 
+                'Payment Mode', 'Reference', 'Date', 'Type'
+            ]);
+            
+            // 4. Daily Sales Report
+            const dailySalesData = [];
+            Object.values(dailySales).forEach(day => {
+                dailySalesData.push([
+                    day.date,
+                    day.totalSales,
+                    day.totalCollections,
+                    day.creditSales,
+                    day.ordersCount
+                ]);
+            });
+            
+            dailySalesData.unshift([
+                'Date', 'Total Sales', 'Total Collections', 'Credit Sales', 'Orders Count'
+            ]);
+            
+            // Add sheets to workbook
+            const customerWS = XLSX.utils.aoa_to_sheet(customerData);
+            const orderWS = XLSX.utils.aoa_to_sheet(orderData);
+            const paymentWS = XLSX.utils.aoa_to_sheet(paymentData);
+            const dailyWS = XLSX.utils.aoa_to_sheet(dailySalesData);
+            
+            XLSX.utils.book_append_sheet(wb, customerWS, 'Customers');
+            XLSX.utils.book_append_sheet(wb, orderWS, 'Orders');
+            XLSX.utils.book_append_sheet(wb, paymentWS, 'Payments');
+            XLSX.utils.book_append_sheet(wb, dailyWS, 'Daily Sales');
+            
+            // Generate file
+            const storeName = currentUser.store.replace(/\s+/g, '_');
+            const date = new Date().toISOString().split('T')[0];
+            XLSX.writeFile(wb, `${storeName}_Complete_Data_${date}.xlsx`);
+            
+            showToast('Complete data exported to Excel!');
+        }
+        
+        function exportCustomerExcel(customer, orders, payments) {
+            const wb = XLSX.utils.book_new();
+            
+            // Customer Info Sheet
+            const customerInfo = [
+                ['Customer Information'],
+                ['Name:', customer.name],
+                ['Phone:', customer.phone],
+                ['Address:', customer.address],
+                ['Customer Since:', new Date(customer.createdAt).toLocaleDateString()],
+                ['Last Purchase:', new Date(customer.lastPurchaseDate).toLocaleDateString()],
+                [],
+                ['Financial Summary'],
+                ['Total Purchases:', customer.totalAmount || 0],
+                ['Total Paid:', customer.totalPaid || 0],
+                ['Balance Due:', customer.balance || 0]
+            ];
+            
+            const customerWS = XLSX.utils.aoa_to_sheet(customerInfo);
+            
+            // Order History Sheet
+            const orderData = [['Order ID', 'Date', 'Total Amount', 'Advance', 'Balance', 'Payment Mode', 'Status']];
+            orders.forEach(order => {
+                orderData.push([
+                    order.orderId,
+                    order.date,
+                    order.totalAmount,
+                    order.advancePayment || 0,
+                    order.balance || 0,
+                    order.paymentMode,
+                    order.balance <= 0 ? 'Paid' : (order.advancePayment > 0 ? 'Partial' : 'Pending')
+                ]);
+            });
+            
+            const orderWS = XLSX.utils.aoa_to_sheet(orderData);
+            
+            // Payment History Sheet
+            const paymentData = [['Date', 'Amount', 'Payment Mode', 'Reference']];
+            payments.forEach(payment => {
+                paymentData.push([
+                    new Date(payment.date).toLocaleDateString(),
+                    payment.amount,
+                    payment.paymentMode,
+                    payment.reference || '-'
+                ]);
+            });
+            
+            const paymentWS = XLSX.utils.aoa_to_sheet(paymentData);
+            
+            // Add sheets to workbook
+            XLSX.utils.book_append_sheet(wb, customerWS, 'Customer Info');
+            XLSX.utils.book_append_sheet(wb, orderWS, 'Order History');
+            XLSX.utils.book_append_sheet(wb, paymentWS, 'Payment History');
+            
+            // Generate file
+            const customerName = customer.name.replace(/\s+/g, '_');
+            const date = new Date().toISOString().split('T')[0];
+            XLSX.writeFile(wb, `${customerName}_Report_${date}.xlsx`);
+            
+            showToast('Customer report exported to Excel!');
+        }
+        
+        function exportDailySalesReport() {
+            const dailySales = JSON.parse(localStorage.getItem(DAILY_SALES_KEY)) || {};
+            
+            if (Object.keys(dailySales).length === 0) {
+                alert('No daily sales data available');
+                return;
+            }
+            
+            const dailySalesData = [
+                ['Date', 'Total Sales', 'Total Collections', 'Credit Sales', 'Orders Count']
+            ];
+            
+            Object.values(dailySales).forEach(day => {
+                dailySalesData.push([
+                    day.date,
+                    day.totalSales,
+                    day.totalCollections,
+                    day.creditSales,
+                    day.ordersCount
+                ]);
+            });
+            
+            // Add totals row
+            const totals = dailySalesData.slice(1).reduce((acc, row) => {
+                return [
+                    'TOTAL',
+                    acc[1] + row[1],
+                    acc[2] + row[2],
+                    acc[3] + row[3],
+                    acc[4] + row[4]
+                ];
+            }, ['TOTAL', 0, 0, 0, 0]);
+            
+            dailySalesData.push([], totals);
+            
+            const ws = XLSX.utils.aoa_to_sheet(dailySalesData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Daily Sales');
+            
+            const storeName = currentUser.store.replace(/\s+/g, '_');
+            const date = new Date().toISOString().split('T')[0];
+            XLSX.writeFile(wb, `${storeName}_Daily_Sales_${date}.xlsx`);
+            
+            showToast('Daily sales report exported!');
+        }
+        
+        function exportPendingPaymentsReport() {
+            const customers = JSON.parse(localStorage.getItem(CUSTOMERS_KEY)) || [];
+            const pendingCustomers = customers.filter(c => c.balance > 0);
+            
+            if (pendingCustomers.length === 0) {
+                alert('No pending payments found');
+                return;
+            }
+            
+            const pendingData = [
+                ['Customer ID', 'Name', 'Phone', 'Total Purchases', 'Total Paid', 'Balance Due', 'Last Purchase Date']
+            ];
+            
+            pendingCustomers.forEach(customer => {
+                pendingData.push([
+                    customer.id,
+                    customer.name,
+                    customer.phone,
+                    customer.totalAmount || 0,
+                    customer.totalPaid || 0,
+                    customer.balance || 0,
+                    new Date(customer.lastPurchaseDate).toLocaleDateString()
+                ]);
+            });
+            
+            // Add totals
+            const totals = pendingData.slice(1).reduce((acc, row) => {
+                return [
+                    'TOTAL',
+                    '',
+                    '',
+                    acc[3] + row[3],
+                    acc[4] + row[4],
+                    acc[5] + row[5],
+                    ''
+                ];
+            }, ['TOTAL', '', '', 0, 0, 0, '']);
+            
+            pendingData.push([], totals);
+            
+            const ws = XLSX.utils.aoa_to_sheet(pendingData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Pending Payments');
+            
+            const storeName = currentUser.store.replace(/\s+/g, '_');
+            const date = new Date().toISOString().split('T')[0];
+            XLSX.writeFile(wb, `${storeName}_Pending_Payments_${date}.xlsx`);
+            
+            showToast('Pending payments report exported!');
+        }
+        
+        function deletePayment(paymentId) {
+            if (!confirm('Are you sure you want to delete this payment record?')) {
+                return;
+            }
+            
+            let payments = JSON.parse(localStorage.getItem(PAYMENTS_KEY)) || [];
+            const paymentIndex = payments.findIndex(p => p.id === paymentId);
+            
+            if (paymentIndex !== -1) {
+                const payment = payments[paymentIndex];
+                
+                // Remove payment
+                payments.splice(paymentIndex, 1);
+                localStorage.setItem(PAYMENTS_KEY, JSON.stringify(payments));
+                
+                // Update customer financials
+                const customers = JSON.parse(localStorage.getItem(CUSTOMERS_KEY)) || [];
+                const customerIndex = customers.findIndex(c => c.id === payment.customerId);
+                
+                if (customerIndex !== -1) {
+                    const customer = customers[customerIndex];
+                    customer.totalPaid -= payment.amount;
+                    customer.balance = (customer.totalAmount || 0) - (customer.totalPaid || 0);
+                    customers[customerIndex] = customer;
+                    localStorage.setItem(CUSTOMERS_KEY, JSON.stringify(customers));
+                }
+                
+                // Refresh display
+                const updatedCustomer = customers.find(c => c.id === payment.customerId);
+                const orders = JSON.parse(localStorage.getItem(ORDERS_KEY)) || [];
+                const updatedPayments = JSON.parse(localStorage.getItem(PAYMENTS_KEY)) || [];
+                
+                if (updatedCustomer) {
+                    displayCustomerDetails(updatedCustomer, orders, updatedPayments);
+                }
+                
+                updateStats();
+                showToast('Payment record deleted');
+            }
+        }
+        
+        function getCustomerName(customerId) {
+            const customers = JSON.parse(localStorage.getItem(CUSTOMERS_KEY)) || [];
+            const customer = customers.find(c => c.id === customerId);
+            return customer ? customer.name : 'Unknown';
+        }
+        
+        function showToast(message) {
+            const toast = document.getElementById('success-toast');
+            const toastMessage = document.getElementById('toast-message');
+            
+            toastMessage.textContent = message;
+            toast.classList.remove('translate-y-full');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-full');
+            }, 3000);
+        }
+        
+        // Helper function to show loading overlay
+        function showLoading() {
+            document.getElementById('loading-overlay').classList.remove('hidden');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading-overlay').classList.add('hidden');
+        }
+        
+        // Handle pricing management (to be implemented)
+        document.getElementById('manage-pricing-btn').addEventListener('click', function() {
+            alert('Pricing management will be implemented in the next version.');
+        });
+        
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl + S to save order
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                document.getElementById('submit-order-btn').click();
+            }
+            
+            // Ctrl + F to search
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                document.getElementById('customer-search-btn').click();
+                document.getElementById('search-name').focus();
+            }
+            
+            // Escape to close modals
+            if (e.key === 'Escape') {
+                document.getElementById('search-modal').classList.add('hidden');
+                document.getElementById('payment-modal').classList.add('hidden');
+            }
+        });
+        
+        // Animation on load
+        setTimeout(() => {
+            document.querySelectorAll('.slide-up').forEach(el => {
+                el.classList.add('slide-up');
+            });
+        }, 100);
+    </script>
+</body>
+</html>
