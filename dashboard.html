@@ -19,20 +19,20 @@
             background: linear-gradient(135deg, #1a365d 0%, #2d3748 100%);
         }
         .btn-gradient {
-            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         .btn-gradient:hover {
-            background: linear-gradient(135deg, #c53030 0%, #9b2c2c 100%);
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
         }
         .card-shadow {
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
         }
         .material-card {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
         }
         .material-card:hover {
-            transform: translateY(-15px) scale(1.02);
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
         }
         .scrollbar-hide {
             -ms-overflow-style: none;
@@ -63,8 +63,8 @@
         }
         .construction-border {
             position: relative;
-            border: 2px solid #e53e3e;
-            border-radius: 15px;
+            border: 2px solid #667eea;
+            border-radius: 12px;
             overflow: hidden;
         }
         .status-paid {
@@ -105,21 +105,27 @@
             font-weight: bold;
             color: white;
         }
+        .price-input {
+            transition: all 0.3s;
+        }
+        .price-input:focus {
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
     </style>
 </head>
 <body class="bg-gray-50">
     <!-- Main Dashboard Container -->
     <div id="dashboard-container" class="min-h-screen">
         <!-- Enhanced Dashboard Header -->
-        <header class="construction-gradient text-white p-4 shadow-xl">
+        <header class="construction-gradient text-white p-4 shadow-lg">
             <div class="container mx-auto">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
                     <div class="flex items-center space-x-3 mb-4 md:mb-0">
                         <div class="construction-border p-3 bg-gray-900">
-                            <i class="fas fa-hard-hat text-2xl text-red-500"></i>
+                            <i class="fas fa-hard-hat text-2xl text-blue-400"></i>
                         </div>
                         <div>
-                            <h1 class="text-2xl font-bold roboto-slab">NAMAN <span class="text-red-500">ENTERPRISES</span></h1>
+                            <h1 class="text-2xl font-bold roboto-slab">NAMAN <span class="text-blue-400">ENTERPRISES</span></h1>
                             <div class="flex items-center space-x-2 text-sm opacity-90">
                                 <span>Customer Management Dashboard</span>
                                 <span class="text-white/50">•</span>
@@ -145,12 +151,117 @@
             </div>
         </header>
         
+        <!-- Pricing Management Modal -->
+        <div id="pricing-modal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 hidden">
+            <div class="bg-gray-900 rounded-2xl p-8 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-white roboto-slab">
+                        <i class="fas fa-tags mr-2 text-blue-400"></i>Manage Material Pricing
+                    </h2>
+                    <button id="close-pricing-modal" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-6">
+                    <!-- Cement Pricing -->
+                    <div class="bg-gray-800 rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                            <i class="fas fa-cube mr-3 text-blue-400"></i>Cement Pricing (per bag)
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-gray-300 mb-2">UltraTech Cement</label>
+                                <input type="number" id="price-cement-ultratech" class="price-input w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="1">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 mb-2">ACC Cement</label>
+                                <input type="number" id="price-cement-acc" class="price-input w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="1">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 mb-2">Ambuja Cement</label>
+                                <input type="number" id="price-cement-ambuja" class="price-input w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="1">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Steel Rods Pricing -->
+                    <div class="bg-gray-800 rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                            <i class="fas fa-grip-lines mr-3 text-red-400"></i>Steel Rods Pricing (per piece)
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-gray-300 mb-2">6mm Rods</label>
+                                <input type="number" id="price-rods-6mm" class="price-input w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="1">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 mb-2">8mm Rods</label>
+                                <input type="number" id="price-rods-8mm" class="price-input w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="1">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sand Pricing -->
+                    <div class="bg-gray-800 rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                            <i class="fas fa-mountain mr-3 text-yellow-400"></i>Sand Pricing (per trailer)
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-gray-300 mb-2">River Sand</label>
+                                <input type="number" id="price-sand-river" class="price-input w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="100">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 mb-2">Pit Sand</label>
+                                <input type="number" id="price-sand-pit" class="price-input w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="100">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 mb-2">Construction Sand</label>
+                                <input type="number" id="price-sand-construction" class="price-input w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="100">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Stone Chips Pricing -->
+                    <div class="bg-gray-800 rounded-xl p-6">
+                        <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                            <i class="fas fa-gem mr-3 text-green-400"></i>Stone Chips Pricing (per trailer)
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-gray-300 mb-2">10mm Aggregate</label>
+                                <input type="number" id="price-stone-10mm" class="price-input w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="100">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 mb-2">20mm Aggregate</label>
+                                <input type="number" id="price-stone-20mm" class="price-input w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="100">
+                            </div>
+                            <div>
+                                <label class="block text-gray-300 mb-2">Crushed Stone</label>
+                                <input type="number" id="price-stone-crushed" class="price-input w-full px-4 py-2 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" min="0" step="100">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-4 pt-6 border-t border-gray-700">
+                        <button id="cancel-pricing-btn" class="px-6 py-3 border border-gray-700 text-gray-300 rounded-lg hover:bg-gray-800">
+                            Cancel
+                        </button>
+                        <button id="save-pricing-btn" class="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">
+                            <i class="fas fa-save mr-2"></i>Save All Prices
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Customer Search Modal -->
         <div id="search-modal" class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 hidden">
             <div class="bg-gray-900 rounded-2xl p-8 max-w-4xl w-full mx-4 max-h-[80vh] overflow-y-auto">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold text-white roboto-slab">
-                        <i class="fas fa-search mr-2 text-red-500"></i>Search Customer
+                        <i class="fas fa-search mr-2 text-blue-400"></i>Search Customer
                     </h2>
                     <button id="close-search-modal" class="text-gray-400 hover:text-white">
                         <i class="fas fa-times text-2xl"></i>
@@ -164,13 +275,13 @@
                             <div>
                                 <label class="block text-gray-300 mb-2 font-medium">Search by Name</label>
                                 <input type="text" id="search-name" 
-                                       class="w-full px-4 py-3 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                       class="w-full px-4 py-3 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                        placeholder="Enter customer name">
                             </div>
                             <div>
                                 <label class="block text-gray-300 mb-2 font-medium">Search by Phone</label>
                                 <input type="tel" id="search-phone" 
-                                       class="w-full px-4 py-3 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                       class="w-full px-4 py-3 bg-gray-700 border border-gray-600 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                        placeholder="Enter phone number">
                             </div>
                         </div>
@@ -224,7 +335,7 @@
                         <div class="bg-gray-800 rounded-xl p-6">
                             <div class="flex justify-between items-center mb-6">
                                 <h4 class="font-bold text-white">Payment History</h4>
-                                <button id="add-new-payment-btn" class="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700">
+                                <button id="add-new-payment-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700">
                                     <i class="fas fa-plus mr-2"></i>Add Payment Record
                                 </button>
                             </div>
@@ -264,7 +375,7 @@
             <div class="bg-gray-900 rounded-2xl p-8 max-w-md w-full mx-4">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold text-white">
-                        <i class="fas fa-rupee-sign mr-2 text-red-500"></i>Add Payment
+                        <i class="fas fa-rupee-sign mr-2 text-blue-400"></i>Add Payment
                     </h2>
                     <button id="close-payment-modal" class="text-gray-400 hover:text-white">
                         <i class="fas fa-times text-2xl"></i>
@@ -277,13 +388,13 @@
                     <div>
                         <label class="block text-gray-300 mb-2 font-medium">Payment Amount (₹)</label>
                         <input type="number" id="payment-amount" required min="0"
-                               class="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                               class="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     
                     <div>
                         <label class="block text-gray-300 mb-2 font-medium">Payment Mode</label>
                         <select id="payment-mode" required
-                               class="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                               class="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <option value="">Select Payment Mode</option>
                             <option value="Cash">Cash</option>
                             <option value="Bank Transfer">Bank Transfer</option>
@@ -296,21 +407,21 @@
                     <div>
                         <label class="block text-gray-300 mb-2 font-medium">Reference/Note</label>
                         <input type="text" id="payment-reference"
-                               class="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                               class="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                placeholder="Transaction ID, Cheque No., etc.">
                     </div>
                     
                     <div>
                         <label class="block text-gray-300 mb-2 font-medium">Payment Date</label>
                         <input type="date" id="payment-date" required
-                               class="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                               class="w-full px-4 py-3 bg-gray-800 border border-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
                     
                     <div class="flex justify-end space-x-4 pt-4">
                         <button type="button" id="cancel-payment-btn" class="px-6 py-3 border border-gray-700 text-gray-300 rounded-lg hover:bg-gray-800">
                             Cancel
                         </button>
-                        <button type="submit" class="px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700">
+                        <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">
                             <i class="fas fa-save mr-2"></i>Save Payment
                         </button>
                     </div>
@@ -322,7 +433,7 @@
         <div class="container mx-auto p-4">
             <!-- Quick Stats -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                <div class="bg-white rounded-xl p-6 card-shadow">
+                <div class="bg-white rounded-xl p-6 card-shadow material-card">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-600 font-medium">Total Customers</p>
@@ -334,20 +445,20 @@
                     </div>
                 </div>
                 
-                <div class="bg-white rounded-xl p-6 card-shadow">
+                <div class="bg-white rounded-xl p-6 card-shadow material-card">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-600 font-medium">Pending Payments</p>
                             <h3 class="text-2xl font-bold text-gray-800" id="pending-payments">₹0</h3>
                         </div>
-                        <div class="bg-red-100 p-3 rounded-full">
-                            <i class="fas fa-exclamation-circle text-red-600 text-xl"></i>
+                        <div class="bg-yellow-100 p-3 rounded-full">
+                            <i class="fas fa-exclamation-circle text-yellow-600 text-xl"></i>
                         </div>
                     </div>
                 </div>
                 
-                <div class="bg-white rounded-xl p-6 card-shadow">
-                    <div class="flex items-center justify-between">
+                <div class="bg-white rounded-xl p-6 card-shadow material-card">
+                    <div class="flex items center justify-between">
                         <div>
                             <p class="text-sm text-gray-600 font-medium">Today's Sales</p>
                             <h3 class="text-2xl font-bold text-gray-800" id="today-sales">₹0</h3>
@@ -358,14 +469,14 @@
                     </div>
                 </div>
                 
-                <div class="bg-white rounded-xl p-6 card-shadow">
+                <div class="bg-white rounded-xl p-6 card-shadow material-card">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-600 font-medium">Overdue Payments</p>
                             <h3 class="text-2xl font-bold text-gray-800" id="overdue-payments">₹0</h3>
                         </div>
-                        <div class="bg-yellow-100 p-3 rounded-full">
-                            <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                        <div class="bg-red-100 p-3 rounded-full">
+                            <i class="fas fa-clock text-red-600 text-xl"></i>
                         </div>
                     </div>
                 </div>
@@ -376,9 +487,9 @@
                 <!-- Left Column: Customer Form -->
                 <div class="lg:col-span-2 space-y-6">
                     <!-- Add Customer Form -->
-                    <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="bg-white rounded-xl p-6 card-shadow material-card">
                         <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">
-                            <i class="fas fa-user-plus text-red-500 mr-2"></i>Add New Customer & Order
+                            <i class="fas fa-user-plus text-blue-500 mr-2"></i>Add New Customer & Order
                         </h2>
                         
                         <form id="customer-form" class="space-y-6">
@@ -387,13 +498,13 @@
                                 <div>
                                     <label class="block text-gray-700 mb-2 font-medium">Customer Name *</label>
                                     <input type="text" id="customer-name" required 
-                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 </div>
                                 
                                 <div>
                                     <label class="block text-gray-700 mb-2 font-medium">Mobile Number *</label>
                                     <input type="tel" id="customer-phone" required 
-                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                                            placeholder="10-digit number">
                                 </div>
                             </div>
@@ -401,14 +512,14 @@
                             <div>
                                 <label class="block text-gray-700 mb-2 font-medium">Address *</label>
                                 <textarea id="customer-address" rows="2" required 
-                                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"></textarea>
+                                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
                             </div>
                             
                             <!-- Payment Details -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div>
                                     <label class="block text-gray-700 mb-2 font-medium">Payment Mode</label>
-                                    <select id="customer-payment-mode" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                                    <select id="customer-payment-mode" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                                         <option value="Cash">Cash</option>
                                         <option value="Credit">Credit</option>
                                         <option value="Partial">Partial Payment</option>
@@ -418,7 +529,7 @@
                                 <div id="advance-payment-container" class="hidden">
                                     <label class="block text-gray-700 mb-2 font-medium">Advance Amount (₹)</label>
                                     <input type="number" id="advance-payment" min="0"
-                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 </div>
                             </div>
                             
@@ -430,16 +541,16 @@
                                 <div class="mb-6">
                                     <label class="block text-gray-700 mb-3 font-medium">Select Material *</label>
                                     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                        <button type="button" data-material="cement" class="material-btn bg-gray-100 border-2 border-gray-300 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-200">
+                                        <button type="button" data-material="cement" class="material-btn bg-gray-100 border-2 border-gray-300 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors">
                                             <i class="fas fa-cube mr-2"></i>Cement
                                         </button>
-                                        <button type="button" data-material="rods" class="material-btn bg-gray-100 border-2 border-gray-300 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-200">
+                                        <button type="button" data-material="rods" class="material-btn bg-gray-100 border-2 border-gray-300 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors">
                                             <i class="fas fa-grip-lines mr-2"></i>Steel Rods
                                         </button>
-                                        <button type="button" data-material="sand" class="material-btn bg-gray-100 border-2 border-gray-300 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-200">
+                                        <button type="button" data-material="sand" class="material-btn bg-gray-100 border-2 border-gray-300 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors">
                                             <i class="fas fa-mountain mr-2"></i>Sand
                                         </button>
-                                        <button type="button" data-material="stone-chips" class="material-btn bg-gray-100 border-2 border-gray-300 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-200">
+                                        <button type="button" data-material="stone-chips" class="material-btn bg-gray-100 border-2 border-gray-300 text-gray-800 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors">
                                             <i class="fas fa-gem mr-2"></i>Stone Chips
                                         </button>
                                     </div>
@@ -450,7 +561,7 @@
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                                         <div>
                                             <label class="block text-gray-700 mb-2 font-medium">Brand/Type</label>
-                                            <select id="material-brand" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                                            <select id="material-brand" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                                             </select>
                                         </div>
                                         
@@ -458,8 +569,8 @@
                                             <label class="block text-gray-700 mb-2 font-medium">Quantity</label>
                                             <div class="flex">
                                                 <input type="number" id="material-quantity" min="1" value="1" 
-                                                       class="w-full px-4 py-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-red-500">
-                                                <select id="material-unit" class="px-4 py-3 border border-l-0 border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                                                       class="w-full px-4 py-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                                <select id="material-unit" class="px-4 py-3 border border-l-0 border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                                                 </select>
                                             </div>
                                         </div>
@@ -468,13 +579,13 @@
                                     <div>
                                         <label class="block text-gray-700 mb-2 font-medium">Additional Notes</label>
                                         <textarea id="order-notes" rows="2" 
-                                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"></textarea>
+                                                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
                                     </div>
                                 </div>
                                 
                                 <!-- Add to Order Button -->
                                 <div id="add-to-order-btn" class="hidden">
-                                    <button type="button" id="add-item-btn" class="w-full btn-gradient text-white py-3 rounded-lg font-bold">
+                                    <button type="button" id="add-item-btn" class="w-full btn-gradient text-white py-3 rounded-lg font-bold hover:shadow-lg transition">
                                         <i class="fas fa-cart-plus mr-2"></i>Add Item to Order
                                     </button>
                                 </div>
@@ -500,7 +611,7 @@
                             
                             <!-- Submit Button -->
                             <div class="pt-6 border-t">
-                                <button type="submit" id="submit-order-btn" class="w-full btn-gradient text-white py-4 rounded-lg font-bold text-lg">
+                                <button type="submit" id="submit-order-btn" class="w-full btn-gradient text-white py-4 rounded-lg font-bold text-lg hover:shadow-lg transition">
                                     <i class="fas fa-check-circle mr-2"></i>Save Customer & Order
                                 </button>
                             </div>
@@ -508,9 +619,9 @@
                     </div>
                     
                     <!-- Recent Orders -->
-                    <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="bg-white rounded-xl p-6 card-shadow material-card">
                         <h2 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-3">
-                            <i class="fas fa-history text-red-500 mr-2"></i>Recent Orders
+                            <i class="fas fa-history text-blue-500 mr-2"></i>Recent Orders
                         </h2>
                         <div class="overflow-x-auto">
                             <table class="w-full">
@@ -538,9 +649,9 @@
                 <!-- Right Column: Quick Actions & Customers -->
                 <div class="space-y-6">
                     <!-- Quick Stats -->
-                    <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="bg-white rounded-xl p-6 card-shadow material-card">
                         <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-3">
-                            <i class="fas fa-chart-bar text-red-500 mr-2"></i>Quick Overview
+                            <i class="fas fa-chart-bar text-blue-500 mr-2"></i>Quick Overview
                         </h2>
                         <div class="space-y-4">
                             <div class="flex justify-between items-center">
@@ -559,9 +670,9 @@
                     </div>
                     
                     <!-- Recent Customers -->
-                    <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="bg-white rounded-xl p-6 card-shadow material-card">
                         <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-3">
-                            <i class="fas fa-users text-red-500 mr-2"></i>Recent Customers
+                            <i class="fas fa-users text-blue-500 mr-2"></i>Recent Customers
                         </h2>
                         <div id="customers-list" class="space-y-4 max-h-96 overflow-y-auto scrollbar-hide">
                             <div class="text-center py-6 text-gray-500">
@@ -572,18 +683,18 @@
                     </div>
                     
                     <!-- Quick Actions -->
-                    <div class="bg-white rounded-xl p-6 card-shadow">
+                    <div class="bg-white rounded-xl p-6 card-shadow material-card">
                         <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-3">
-                            <i class="fas fa-bolt text-red-500 mr-2"></i>Quick Actions
+                            <i class="fas fa-bolt text-blue-500 mr-2"></i>Quick Actions
                         </h2>
                         <div class="space-y-3">
-                            <button id="export-all-excel" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-medium">
+                            <button id="export-all-excel" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-medium transition">
                                 <i class="fas fa-file-excel mr-2"></i>Export All Data
                             </button>
-                            <button id="export-daily-sales" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium">
+                            <button id="export-daily-sales" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition">
                                 <i class="fas fa-calendar-day mr-2"></i>Daily Sales Report
                             </button>
-                            <button id="export-pending-payments" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-3 rounded-lg font-medium">
+                            <button id="export-pending-payments" class="w-full bg-yellow-600 hover:bg-yellow-700 text-white py-3 rounded-lg font-medium transition">
                                 <i class="fas fa-exclamation-circle mr-2"></i>Pending Payments
                             </button>
                         </div>
@@ -604,7 +715,7 @@
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl p-8 flex flex-col items-center">
-            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-700 mb-4"></div>
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-700 mb-4"></div>
             <p class="text-gray-800 font-medium">Processing...</p>
         </div>
     </div>
@@ -647,6 +758,7 @@
             setupOrderForm();
             setupSearchSystem();
             setupPaymentSystem();
+            setupPricingManagement();
             
             // Load data
             loadDataFromStorage();
@@ -696,6 +808,112 @@
             });
         }
         
+        function setupPricingManagement() {
+            const pricingModal = document.getElementById('pricing-modal');
+            const managePricingBtn = document.getElementById('manage-pricing-btn');
+            const closePricingModal = document.getElementById('close-pricing-modal');
+            const cancelPricingBtn = document.getElementById('cancel-pricing-btn');
+            const savePricingBtn = document.getElementById('save-pricing-btn');
+            
+            // Open pricing modal
+            managePricingBtn.addEventListener('click', function() {
+                loadCurrentPrices();
+                pricingModal.classList.remove('hidden');
+            });
+            
+            // Close pricing modal
+            closePricingModal.addEventListener('click', function() {
+                pricingModal.classList.add('hidden');
+            });
+            
+            cancelPricingBtn.addEventListener('click', function() {
+                pricingModal.classList.add('hidden');
+            });
+            
+            // Close modal when clicking outside
+            pricingModal.addEventListener('click', function(event) {
+                if (event.target === this) {
+                    this.classList.add('hidden');
+                }
+            });
+            
+            // Save pricing
+            savePricingBtn.addEventListener('click', function() {
+                saveCurrentPrices();
+                pricingModal.classList.add('hidden');
+                showToast('Prices updated successfully!');
+            });
+        }
+        
+        function loadCurrentPrices() {
+            if (!currentUser || !currentUser.pricing) return;
+            
+            const prices = currentUser.pricing;
+            
+            // Cement prices
+            document.getElementById('price-cement-ultratech').value = prices.cement['UltraTech Cement'] || '';
+            document.getElementById('price-cement-acc').value = prices.cement['ACC Cement'] || '';
+            document.getElementById('price-cement-ambuja').value = prices.cement['Ambuja Cement'] || '';
+            
+            // Rods prices
+            document.getElementById('price-rods-6mm').value = prices.rods['6mm'] || '';
+            document.getElementById('price-rods-8mm').value = prices.rods['8mm'] || '';
+            
+            // Sand prices
+            document.getElementById('price-sand-river').value = prices.sand['River Sand'] || '';
+            document.getElementById('price-sand-pit').value = prices.sand['Pit Sand'] || '';
+            document.getElementById('price-sand-construction').value = prices.sand['Construction Sand'] || '';
+            
+            // Stone chips prices
+            document.getElementById('price-stone-10mm').value = prices.stoneChips['10mm Aggregate'] || '';
+            document.getElementById('price-stone-20mm').value = prices.stoneChips['20mm Aggregate'] || '';
+            document.getElementById('price-stone-crushed').value = prices.stoneChips['Crushed Stone'] || '';
+        }
+        
+        function saveCurrentPrices() {
+            if (!currentUser) return;
+            
+            // Get current users
+            let storeUsers = JSON.parse(localStorage.getItem(STORE_USERS_KEY)) || [];
+            const userIndex = storeUsers.findIndex(u => 
+                u.store === currentUser.store && u.phone === currentUser.phone
+            );
+            
+            if (userIndex === -1) return;
+            
+            // Update pricing
+            storeUsers[userIndex].pricing = {
+                cement: {
+                    'UltraTech Cement': parseFloat(document.getElementById('price-cement-ultratech').value) || 0,
+                    'ACC Cement': parseFloat(document.getElementById('price-cement-acc').value) || 0,
+                    'Ambuja Cement': parseFloat(document.getElementById('price-cement-ambuja').value) || 0,
+                    'Shree Cement': storeUsers[userIndex].pricing.cement['Shree Cement'] || 0,
+                    'Birla Cement': storeUsers[userIndex].pricing.cement['Birla Cement'] || 0
+                },
+                rods: {
+                    '6mm': parseFloat(document.getElementById('price-rods-6mm').value) || 0,
+                    '8mm': parseFloat(document.getElementById('price-rods-8mm').value) || 0
+                },
+                sand: {
+                    'River Sand': parseFloat(document.getElementById('price-sand-river').value) || 0,
+                    'Pit Sand': parseFloat(document.getElementById('price-sand-pit').value) || 0,
+                    'Construction Sand': parseFloat(document.getElementById('price-sand-construction').value) || 0
+                },
+                stoneChips: {
+                    '10mm Aggregate': parseFloat(document.getElementById('price-stone-10mm').value) || 0,
+                    '20mm Aggregate': parseFloat(document.getElementById('price-stone-20mm').value) || 0,
+                    'Crushed Stone': parseFloat(document.getElementById('price-stone-crushed').value) || 0
+                }
+            };
+            
+            // Save updated users
+            localStorage.setItem(STORE_USERS_KEY, JSON.stringify(storeUsers));
+            
+            // Update current user
+            currentUser.pricing = storeUsers[userIndex].pricing;
+            localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(currentUser));
+        }
+        
         function setupMaterialButtons() {
             const materialButtons = document.querySelectorAll('.material-btn');
             const materialDetails = document.getElementById('material-details');
@@ -725,12 +943,12 @@
             materialButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     materialButtons.forEach(btn => {
-                        btn.classList.remove('bg-red-600', 'text-white', 'border-red-700');
+                        btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-700');
                         btn.classList.add('bg-gray-100', 'text-gray-800', 'border-gray-300');
                     });
                     
                     this.classList.remove('bg-gray-100', 'text-gray-800', 'border-gray-300');
-                    this.classList.add('bg-red-600', 'text-white', 'border-red-700');
+                    this.classList.add('bg-blue-600', 'text-white', 'border-blue-700');
                     
                     const material = this.getAttribute('data-material');
                     
@@ -787,7 +1005,7 @@
                 }
                 
                 if (price <= 0) {
-                    alert('Please set price for this material first');
+                    alert('Please set price for this material first using "Manage Pricing"');
                     return;
                 }
                 
@@ -981,7 +1199,7 @@
                 
                 // Reset material selection
                 document.querySelectorAll('.material-btn').forEach(btn => {
-                    btn.classList.remove('bg-red-600', 'text-white', 'border-red-700');
+                    btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-700');
                     btn.classList.add('bg-gray-100', 'text-gray-800', 'border-gray-300');
                 });
                 document.getElementById('material-details').classList.add('hidden');
@@ -1074,7 +1292,7 @@
                 resultElement.innerHTML = `
                     <div class="flex items-center justify-between">
                         <div class="flex items-center">
-                            <div class="customer-avatar bg-red-600 mr-4">
+                            <div class="customer-avatar bg-blue-600 mr-4">
                                 ${customer.name.charAt(0).toUpperCase()}
                             </div>
                             <div>
@@ -1119,19 +1337,19 @@
             // Set customer info
             customerInfo.innerHTML = `
                 <div class="flex items-center mb-3">
-                    <i class="fas fa-phone text-red-400 mr-3"></i>
+                    <i class="fas fa-phone text-blue-400 mr-3"></i>
                     <span class="text-gray-300">${customer.phone}</span>
                 </div>
                 <div class="flex items-start mb-3">
-                    <i class="fas fa-map-marker-alt text-red-400 mr-3 mt-1"></i>
+                    <i class="fas fa-map-marker-alt text-blue-400 mr-3 mt-1"></i>
                     <span class="text-gray-300">${customer.address}</span>
                 </div>
                 <div class="flex items-center mb-3">
-                    <i class="fas fa-calendar-alt text-red-400 mr-3"></i>
+                    <i class="fas fa-calendar-alt text-blue-400 mr-3"></i>
                     <span class="text-gray-300">Customer Since: ${new Date(customer.createdAt).toLocaleDateString()}</span>
                 </div>
                 <div class="flex items-center">
-                    <i class="fas fa-shopping-cart text-red-400 mr-3"></i>
+                    <i class="fas fa-shopping-cart text-blue-400 mr-3"></i>
                     <span class="text-gray-300">Total Orders: ${customer.totalPurchases || 0}</span>
                 </div>
             `;
@@ -1238,18 +1456,18 @@
             }
             
             // Set up export customer Excel button
-            document.getElementById('export-customer-excel').addEventListener('click', function() {
+            document.getElementById('export-customer-excel').onclick = function() {
                 exportCustomerExcel(customer, customerOrders, customerPayments);
-            });
+            };
             
             // Set up add payment button
-            document.getElementById('add-payment-btn').addEventListener('click', function() {
+            document.getElementById('add-payment-btn').onclick = function() {
                 openPaymentModal(customer.id);
-            });
+            };
             
-            document.getElementById('add-new-payment-btn').addEventListener('click', function() {
+            document.getElementById('add-new-payment-btn').onclick = function() {
                 openPaymentModal(customer.id);
-            });
+            };
         }
         
         function setupPaymentSystem() {
@@ -1358,7 +1576,7 @@
             const materialButtons = document.querySelectorAll('.material-btn');
             let selectedMaterial = '';
             materialButtons.forEach(button => {
-                if (button.classList.contains('bg-red-600')) {
+                if (button.classList.contains('bg-blue-600')) {
                     selectedMaterial = button.getAttribute('data-material');
                 }
             });
@@ -1463,9 +1681,9 @@
                 customersList.innerHTML = '';
                 customers.slice(-5).reverse().forEach(customer => {
                     const customerElement = document.createElement('div');
-                    customerElement.className = 'flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer';
+                    customerElement.className = 'flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition';
                     customerElement.innerHTML = `
-                        <div class="bg-red-100 text-red-800 rounded-full w-10 h-10 flex items-center justify-center mr-3">
+                        <div class="bg-blue-100 text-blue-800 rounded-full w-10 h-10 flex items-center justify-center mr-3">
                             <i class="fas fa-user"></i>
                         </div>
                         <div class="flex-1">
@@ -1932,11 +2150,6 @@
             document.getElementById('loading-overlay').classList.add('hidden');
         }
         
-        // Handle pricing management (to be implemented)
-        document.getElementById('manage-pricing-btn').addEventListener('click', function() {
-            alert('Pricing management will be implemented in the next version.');
-        });
-        
         // Add keyboard shortcuts
         document.addEventListener('keydown', function(e) {
             // Ctrl + S to save order
@@ -1956,6 +2169,7 @@
             if (e.key === 'Escape') {
                 document.getElementById('search-modal').classList.add('hidden');
                 document.getElementById('payment-modal').classList.add('hidden');
+                document.getElementById('pricing-modal').classList.add('hidden');
             }
         });
         
