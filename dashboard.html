@@ -140,17 +140,6 @@
             animation: pulseSuccess 2s ease-in-out;
         }
         
-        .confetti {
-            position: fixed;
-            width: 15px;
-            height: 15px;
-            background: var(--color);
-            top: 0;
-            left: var(--left);
-            opacity: 0;
-            animation: confettiFall 2s ease-in forwards;
-        }
-        
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -171,17 +160,6 @@
             0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
             70% { box-shadow: 0 0 0 20px rgba(16, 185, 129, 0); }
             100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-        }
-        
-        @keyframes confettiFall {
-            0% {
-                opacity: 1;
-                transform: translateY(0) rotate(0deg);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(100vh) rotate(720deg);
-            }
         }
     </style>
 </head>
@@ -412,9 +390,70 @@
                         </div>
                     </div>
                     
-                    <!-- Customer Form -->
+                    <!-- Add Cart Section -->
+                    <div class="mb-6">
+                        <div class="card p-6">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-lg font-semibold text-gray-800">Shopping Cart</h3>
+                                <button id="clear-cart-btn" class="text-red-600 hover:text-red-800">
+                                    <i class="fas fa-trash mr-1"></i> Clear Cart
+                                </button>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <div id="cart-empty" class="text-center py-8">
+                                    <i class="fas fa-shopping-cart text-4xl text-gray-300 mb-3"></i>
+                                    <p class="text-gray-500">Your cart is empty</p>
+                                    <p class="text-sm text-gray-400 mt-1">Add products from the form below</p>
+                                </div>
+                                
+                                <div id="cart-items" class="hidden">
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full">
+                                            <thead class="bg-gray-50">
+                                                <tr>
+                                                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-700">Product</th>
+                                                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-700">Category</th>
+                                                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-700">Quantity</th>
+                                                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-700">Unit Price</th>
+                                                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-700">Total</th>
+                                                    <th class="py-3 px-4 text-left text-sm font-medium text-gray-700">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="cart-items-table" class="divide-y divide-gray-200">
+                                                <!-- Cart items will be inserted here -->
+                                            </tbody>
+                                            <tfoot id="cart-summary" class="bg-gray-50">
+                                                <!-- Cart summary will be inserted here -->
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                    
+                                    <div class="mt-4 flex justify-between items-center">
+                                        <div class="text-lg font-semibold" id="cart-total-display">
+                                            Cart Total: ₹0
+                                        </div>
+                                        <button id="checkout-btn" class="btn-primary">
+                                            <i class="fas fa-shopping-bag mr-2"></i>Proceed to Checkout
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex space-x-3">
+                                <button id="add-to-cart-btn" class="btn-primary flex-1">
+                                    <i class="fas fa-cart-plus mr-2"></i>Add to Cart
+                                </button>
+                                <button onclick="generateReceipt()" class="btn-success flex-1">
+                                    <i class="fas fa-receipt mr-2"></i>Generate Receipt
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Customer Form & Order -->
                     <div id="customer-form-container" class="card p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-6">Add Customer & Order</h3>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-6">Customer Details & Product Selection</h3>
                         <form id="customer-order-form" class="space-y-4">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
@@ -432,76 +471,82 @@
                                 <textarea id="customer-address" rows="2" class="input-field"></textarea>
                             </div>
                             
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Category *</label>
-                                    <select id="category-select" class="input-field" required onchange="updateProductOptions()">
-                                        <option value="">Select Category</option>
-                                        <option value="cement">Cement</option>
-                                        <option value="rods">Steel Rods</option>
-                                        <option value="sand">Sand</option>
-                                        <option value="stone">Stone Chips</option>
-                                        <option value="chemical">Chemicals</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Product *</label>
-                                    <select id="product-select" class="input-field" required onchange="updateQuantityOptions()">
-                                        <option value="">Select Product</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Quantity *</label>
-                                    <div class="flex space-x-2">
-                                        <input type="number" id="material-quantity" min="0.1" step="0.1" value="1" class="input-field" required>
-                                        <select id="unit-select" class="input-field w-32">
-                                            <option value="bags">Bags</option>
-                                            <option value="bundles">Bundles</option>
-                                            <option value="pcs">Pieces</option>
-                                            <option value="trailers">Trailers</option>
-                                            <option value="liters">Liters</option>
+                            <!-- Product Selection Section -->
+                            <div class="border-t border-gray-200 pt-4">
+                                <h4 class="text-md font-semibold text-gray-800 mb-4">Add Product to Cart</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+                                        <select id="category-select" class="input-field" required onchange="updateProductOptions()">
+                                            <option value="">Select Category</option>
+                                            <option value="cement">Cement</option>
+                                            <option value="rods">Steel Rods</option>
+                                            <option value="sand">Sand</option>
+                                            <option value="stone">Stone Chips</option>
+                                            <option value="chemical">Chemicals</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Product *</label>
+                                        <select id="product-select" class="input-field" required onchange="updateQuantityOptions()">
+                                            <option value="">Select Product</option>
                                         </select>
                                     </div>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Unit Price (₹)</label>
-                                    <input type="number" id="unit-price" class="input-field bg-gray-50" readonly>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Total Amount (₹) *</label>
-                                    <input type="number" id="order-amount" class="input-field bg-gray-100 font-semibold" readonly>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Quantity *</label>
+                                        <div class="flex space-x-2">
+                                            <input type="number" id="material-quantity" min="0.1" step="0.1" value="1" class="input-field" required>
+                                            <select id="unit-select" class="input-field w-32">
+                                                <option value="bags">Bags</option>
+                                                <option value="bundles">Bundles</option>
+                                                <option value="pcs">Pieces</option>
+                                                <option value="trailers">Trailers</option>
+                                                <option value="liters">Liters</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Unit Price (₹)</label>
+                                        <input type="number" id="unit-price" class="input-field bg-gray-50" readonly>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Item Total (₹)</label>
+                                        <input type="number" id="order-amount" class="input-field bg-gray-100 font-semibold" readonly>
+                                    </div>
                                 </div>
                             </div>
                             
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Checkout Section (Will be shown during checkout) -->
+                            <div id="checkout-section" class="hidden border-t border-gray-200 pt-4">
+                                <h4 class="text-md font-semibold text-gray-800 mb-4">Checkout & Payment</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Payment Mode *</label>
+                                        <select id="payment-mode" class="input-field" required>
+                                            <option value="cash">Cash</option>
+                                            <option value="credit">Credit</option>
+                                            <option value="partial">Partial</option>
+                                        </select>
+                                    </div>
+                                    <div id="advance-container" class="hidden">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Advance Amount (₹)</label>
+                                        <input type="number" id="advance-amount" class="input-field">
+                                    </div>
+                                </div>
+                                
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Payment Mode *</label>
-                                    <select id="payment-mode" class="input-field" required>
-                                        <option value="cash">Cash</option>
-                                        <option value="credit">Credit</option>
-                                        <option value="partial">Partial</option>
-                                    </select>
-                                </div>
-                                <div id="advance-container" class="hidden">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Advance Amount (₹)</label>
-                                    <input type="number" id="advance-amount" class="input-field">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Order Notes</label>
+                                    <textarea id="order-notes" rows="2" class="input-field" placeholder="Any additional information..."></textarea>
                                 </div>
                             </div>
                             
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
-                                <textarea id="order-notes" rows="2" class="input-field" placeholder="Any additional information..."></textarea>
-                            </div>
-                            
-                            <div class="flex space-x-4">
-                                <button type="submit" class="btn-primary flex-1 py-3">
-                                    <i class="fas fa-save mr-2"></i>Save Customer & Order
-                                </button>
-                                <button type="button" id="generate-receipt-btn" class="btn-success flex-1 py-3" onclick="generateReceipt()">
-                                    <i class="fas fa-receipt mr-2"></i>Generate Receipt
+                            <!-- Updated Submit Button -->
+                            <div class="flex space-x-4 pt-4" id="form-buttons">
+                                <button type="submit" id="save-order-btn" class="btn-primary flex-1 py-3 hidden">
+                                    <i class="fas fa-save mr-2"></i>Complete Order
                                 </button>
                             </div>
                         </form>
@@ -629,6 +674,53 @@
                             <button id="generate-report-btn" class="btn-success">
                                 <i class="fas fa-chart-bar mr-2"></i>Generate Report
                             </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Data Protection Center - NEW SECTION ADDED -->
+                    <div class="card p-6 mb-6 border-2 border-green-200">
+                        <h3 class="text-lg font-semibold text-green-800 mb-4">
+                            <i class="fas fa-shield-alt mr-2"></i>Data Protection Center
+                        </h3>
+                        
+                        <div class="space-y-4">
+                            <!-- Backup Button -->
+                            <div class="p-4 bg-blue-50 rounded-lg">
+                                <button onclick="backupAllData()" 
+                                        class="btn-primary w-full mb-2">
+                                    <i class="fas fa-download mr-2"></i>Step 1: Create Backup File
+                                </button>
+                                <p class="text-sm text-gray-600">Downloads all data to your computer</p>
+                            </div>
+                            
+                            <!-- Google Drive Instructions -->
+                            <div class="p-4 bg-green-50 rounded-lg">
+                                <div class="flex items-center mb-2">
+                                    <i class="fab fa-google-drive text-green-600 mr-2"></i>
+                                    <span class="font-medium">Step 2: Save to Google Drive</span>
+                                </div>
+                                <ol class="text-sm text-gray-700 list-decimal pl-5 space-y-1">
+                                    <li>Open <a href="https://drive.google.com" target="_blank" class="text-blue-600 underline">drive.google.com</a></li>
+                                    <li>Create folder "Business Backups"</li>
+                                    <li>Drag downloaded file into this folder</li>
+                                    <li>Rename with today's date</li>
+                                </ol>
+                                <p class="text-xs text-gray-500 mt-2">Uses your free 15GB storage</p>
+                            </div>
+                            
+                            <!-- Restore Warning -->
+                            <div class="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                                <input type="file" id="restore-file" accept=".json" class="hidden" 
+                                       onchange="restoreFromBackup(this.files[0])">
+                                <button onclick="document.getElementById('restore-file').click()" 
+                                        class="btn-success w-full mb-2">
+                                    <i class="fas fa-upload mr-2"></i>Restore from Backup (⚠️ Use Only if Data Lost)
+                                </button>
+                                <p class="text-sm text-red-600 font-medium">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                                    WARNING: This replaces ALL current data!
+                                </p>
+                            </div>
                         </div>
                     </div>
                     
@@ -830,29 +922,115 @@
                         <option value="bundles">Bundles</option>
                         <option value="pcs">Pieces</option>
                         <option value="trailers">Trailers</option>
-                                        <option value="liters">Liters</option>
-                                        <option value="kg">Kilograms</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Price (₹) *</label>
-                                    <input type="number" id="edit-product-price" class="input-field" required>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                                    <textarea id="edit-product-desc" rows="2" class="input-field"></textarea>
-                                </div>
-                                <div class="flex justify-end space-x-3">
-                                    <button type="button" onclick="closePriceModal()" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
-                                        Cancel
-                                    </button>
-                                    <button type="submit" class="btn-primary px-4 py-2">
-                                        Save Price
-                                    </button>
-                                </div>
-                            </form>
+                        <option value="liters">Liters</option>
+                        <option value="kg">Kilograms</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Price (₹) *</label>
+                    <input type="number" id="edit-product-price" class="input-field" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <textarea id="edit-product-desc" rows="2" class="input-field"></textarea>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closePriceModal()" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-primary px-4 py-2">
+                        Save Price
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Checkout Modal -->
+    <div id="checkout-modal" class="fixed inset-0 modal-overlay flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-gray-800">Order Summary & Checkout</h3>
+                <button onclick="closeCheckoutModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Customer Details -->
+                <div>
+                    <h4 class="font-semibold text-gray-700 mb-3">Customer Details</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg space-y-2">
+                        <div><strong>Name:</strong> <span id="checkout-customer-name"></span></div>
+                        <div><strong>Phone:</strong> <span id="checkout-customer-phone"></span></div>
+                        <div><strong>Address:</strong> <span id="checkout-customer-address"></span></div>
+                    </div>
+                    
+                    <h4 class="font-semibold text-gray-700 mb-3 mt-4">Payment Details</h4>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Payment Mode *</label>
+                            <select id="checkout-payment-mode" class="input-field" required>
+                                <option value="cash">Cash</option>
+                                <option value="credit">Credit</option>
+                                <option value="partial">Partial</option>
+                            </select>
+                        </div>
+                        <div id="checkout-advance-container" class="hidden">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Advance Amount (₹)</label>
+                            <input type="number" id="checkout-advance-amount" class="input-field">
                         </div>
                     </div>
+                </div>
+                
+                <!-- Order Summary -->
+                <div>
+                    <h4 class="font-semibold text-gray-700 mb-3">Order Summary</h4>
+                    <div class="bg-gray-50 p-4 rounded-lg mb-4">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="py-2 px-3 text-left text-sm">Product</th>
+                                        <th class="py-2 px-3 text-left text-sm">Qty</th>
+                                        <th class="py-2 px-3 text-left text-sm">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="checkout-items-table">
+                                    <!-- Items will be inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="mt-4 pt-4 border-t border-gray-300">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-medium">Subtotal:</span>
+                                <span>₹<span id="checkout-subtotal">0</span></span>
+                            </div>
+                            <div class="flex justify-between items-center text-lg font-bold">
+                                <span>Total Amount:</span>
+                                <span>₹<span id="checkout-total">0</span></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                        <textarea id="checkout-notes" rows="2" class="input-field" placeholder="Any additional information..."></textarea>
+                    </div>
+                    
+                    <div class="mt-6 flex space-x-3">
+                        <button onclick="closeCheckoutModal()" class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg flex-1">
+                            Cancel
+                        </button>
+                        <button onclick="completeCheckout()" class="btn-primary flex-1">
+                            <i class="fas fa-check mr-2"></i>Confirm Order
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg z-50 transform translate-y-20 transition-transform">
@@ -913,6 +1091,7 @@
         let currentUser = null;
         let currentCustomerExcel = null;
         let currentReceiptData = null;
+        let shoppingCart = [];
         
         // ==================== INITIALIZATION ====================
         document.addEventListener('DOMContentLoaded', function() {
@@ -1039,6 +1218,35 @@
                 generateReport();
             });
             
+            // Cart event listeners
+            document.getElementById('add-to-cart-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                addToCart();
+            });
+            
+            document.getElementById('clear-cart-btn').addEventListener('click', clearCart);
+            
+            document.getElementById('checkout-btn').addEventListener('click', function(e) {
+                e.preventDefault();
+                proceedToCheckout();
+            });
+            
+            // Checkout modal payment mode change
+            document.getElementById('checkout-payment-mode').addEventListener('change', function() {
+                const advanceContainer = document.getElementById('checkout-advance-container');
+                if (this.value === 'partial') {
+                    advanceContainer.classList.remove('hidden');
+                } else {
+                    advanceContainer.classList.add('hidden');
+                }
+            });
+            
+            // Form submission (for cart)
+            document.getElementById('customer-order-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addToCart();
+            });
+            
             // Close modals when clicking outside
             document.querySelectorAll('.modal-overlay').forEach(modal => {
                 modal.addEventListener('click', function(e) {
@@ -1138,6 +1346,627 @@
                     loadProductPrices();
                     break;
             }
+        }
+        
+        // ==================== CART MANAGEMENT ====================
+        function addToCart() {
+            const productId = parseInt(document.getElementById('product-select').value);
+            const quantity = parseFloat(document.getElementById('material-quantity').value) || 0;
+            const unit = document.getElementById('unit-select').value;
+            const unitPrice = parseFloat(document.getElementById('unit-price').value) || 0;
+            const itemTotal = parseFloat(document.getElementById('order-amount').value) || 0;
+            
+            if (!productId || quantity <= 0 || unitPrice <= 0) {
+                showToast('Please select a product and enter valid quantity', 'error');
+                return;
+            }
+            
+            // Get product details
+            const products = getProducts();
+            const product = products.find(p => p.id === productId);
+            
+            if (!product) {
+                showToast('Product not found', 'error');
+                return;
+            }
+            
+            // Check if product already in cart
+            const existingIndex = shoppingCart.findIndex(item => item.productId === productId && item.unit === unit);
+            
+            if (existingIndex > -1) {
+                // Update existing item
+                shoppingCart[existingIndex].quantity += quantity;
+                shoppingCart[existingIndex].itemTotal = shoppingCart[existingIndex].quantity * unitPrice;
+                showToast('Product quantity updated in cart');
+            } else {
+                // Add new item
+                const cartItem = {
+                    id: Date.now(),
+                    productId: productId,
+                    productName: product.name,
+                    productCategory: product.category,
+                    productBrand: product.brand || '',
+                    quantity: quantity,
+                    unit: unit,
+                    unitPrice: unitPrice,
+                    itemTotal: itemTotal,
+                    unitWeight: product.unitWeight || '',
+                    piecesPerBundle: product.piecesPerBundle || null
+                };
+                
+                shoppingCart.push(cartItem);
+                showToast('Product added to cart');
+            }
+            
+            // Update cart display
+            updateCartDisplay();
+            
+            // Reset form for next item
+            document.getElementById('material-quantity').value = '1';
+            document.getElementById('unit-price').value = '';
+            document.getElementById('order-amount').value = '';
+            
+            // Scroll to cart
+            document.getElementById('cart-items').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
+        function updateCartDisplay() {
+            const cartEmpty = document.getElementById('cart-empty');
+            const cartItems = document.getElementById('cart-items');
+            const cartTable = document.getElementById('cart-items-table');
+            const cartSummary = document.getElementById('cart-summary');
+            const cartTotalDisplay = document.getElementById('cart-total-display');
+            
+            if (shoppingCart.length === 0) {
+                cartEmpty.classList.remove('hidden');
+                cartItems.classList.add('hidden');
+                cartTotalDisplay.textContent = 'Cart Total: ₹0';
+                return;
+            }
+            
+            cartEmpty.classList.add('hidden');
+            cartItems.classList.remove('hidden');
+            
+            // Clear existing rows
+            cartTable.innerHTML = '';
+            
+            let subtotal = 0;
+            
+            // Add cart items
+            shoppingCart.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.className = 'table-row fade-in';
+                
+                row.innerHTML = `
+                    <td class="py-3 px-4">
+                        <div class="font-medium text-gray-800">${item.productName}</div>
+                        <div class="text-sm text-gray-600">${item.productBrand}</div>
+                    </td>
+                    <td class="py-3 px-4 capitalize">${item.productCategory}</td>
+                    <td class="py-3 px-4">${item.quantity} ${item.unit}</td>
+                    <td class="py-3 px-4">₹${item.unitPrice}</td>
+                    <td class="py-3 px-4 font-medium">₹${item.itemTotal.toFixed(2)}</td>
+                    <td class="py-3 px-4">
+                        <button onclick="updateCartItem(${index})" class="text-blue-600 hover:text-blue-800 mr-2" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="removeFromCart(${index})" class="text-red-600 hover:text-red-800" title="Remove">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                
+                cartTable.appendChild(row);
+                subtotal += item.itemTotal;
+            });
+            
+            // Update summary
+            const total = subtotal;
+            cartSummary.innerHTML = `
+                <tr>
+                    <td colspan="4" class="py-3 px-4 text-right font-medium">Subtotal:</td>
+                    <td class="py-3 px-4 font-bold text-lg">₹${total.toFixed(2)}</td>
+                    <td class="py-3 px-4"></td>
+                </tr>
+            `;
+            
+            cartTotalDisplay.textContent = `Cart Total: ₹${total.toFixed(2)}`;
+        }
+        
+        function removeFromCart(index) {
+            if (index >= 0 && index < shoppingCart.length) {
+                const removedItem = shoppingCart[index];
+                shoppingCart.splice(index, 1);
+                updateCartDisplay();
+                showToast(`Removed ${removedItem.productName} from cart`);
+            }
+        }
+        
+        function updateCartItem(index) {
+            if (index >= 0 && index < shoppingCart.length) {
+                const item = shoppingCart[index];
+                
+                // Load item into form
+                document.getElementById('category-select').value = item.productCategory;
+                updateProductOptions();
+                
+                // Wait for product options to update
+                setTimeout(() => {
+                    document.getElementById('product-select').value = item.productId;
+                    updateUnitAndPrice();
+                    
+                    // Set quantity and unit
+                    document.getElementById('material-quantity').value = item.quantity;
+                    document.getElementById('unit-select').value = item.unit;
+                    
+                    // Remove from cart
+                    shoppingCart.splice(index, 1);
+                    updateCartDisplay();
+                    
+                    showToast('Item loaded for editing');
+                }, 100);
+            }
+        }
+        
+        function clearCart() {
+            if (shoppingCart.length === 0) return;
+            
+            if (confirm('Are you sure you want to clear all items from the cart?')) {
+                shoppingCart = [];
+                updateCartDisplay();
+                showToast('Cart cleared');
+            }
+        }
+        
+        function proceedToCheckout() {
+            // Validate customer details
+            const customerName = document.getElementById('customer-name').value.trim();
+            const customerPhone = document.getElementById('customer-phone').value.trim();
+            
+            if (!customerName || !customerPhone) {
+                showToast('Please enter customer details before checkout', 'error');
+                document.getElementById('customer-name').focus();
+                return;
+            }
+            
+            if (shoppingCart.length === 0) {
+                showToast('Please add items to cart before checkout', 'error');
+                return;
+            }
+            
+            // Calculate totals
+            let subtotal = 0;
+            shoppingCart.forEach(item => {
+                subtotal += item.itemTotal;
+            });
+            
+            // Update checkout modal
+            document.getElementById('checkout-customer-name').textContent = customerName;
+            document.getElementById('checkout-customer-phone').textContent = customerPhone;
+            document.getElementById('checkout-customer-address').textContent = document.getElementById('customer-address').value || 'Not provided';
+            document.getElementById('checkout-subtotal').textContent = subtotal.toFixed(2);
+            document.getElementById('checkout-total').textContent = subtotal.toFixed(2);
+            
+            // Update checkout items table
+            const checkoutTable = document.getElementById('checkout-items-table');
+            checkoutTable.innerHTML = '';
+            
+            shoppingCart.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'border-t';
+                row.innerHTML = `
+                    <td class="py-2 px-3">${item.productName}</td>
+                    <td class="py-2 px-3">${item.quantity} ${item.unit}</td>
+                    <td class="py-2 px-3">₹${item.itemTotal.toFixed(2)}</td>
+                `;
+                checkoutTable.appendChild(row);
+            });
+            
+            // Show checkout modal
+            document.getElementById('checkout-modal').classList.remove('hidden');
+        }
+        
+        function closeCheckoutModal() {
+            document.getElementById('checkout-modal').classList.add('hidden');
+        }
+        
+        function completeCheckout() {
+            const customerName = document.getElementById('customer-name').value.trim();
+            const customerPhone = document.getElementById('customer-phone').value.trim();
+            const customerAddress = document.getElementById('customer-address').value.trim();
+            const paymentMode = document.getElementById('checkout-payment-mode').value;
+            const advanceAmount = paymentMode === 'partial' ? parseFloat(document.getElementById('checkout-advance-amount').value) || 0 : 0;
+            const notes = document.getElementById('checkout-notes').value.trim();
+            
+            // Validation
+            if (!customerName || !customerPhone) {
+                showToast('Customer details are required', 'error');
+                return;
+            }
+            
+            if (shoppingCart.length === 0) {
+                showToast('No items in cart', 'error');
+                return;
+            }
+            
+            // Calculate totals
+            let totalAmount = 0;
+            shoppingCart.forEach(item => {
+                totalAmount += item.itemTotal;
+            });
+            
+            // Check if customer exists
+            let customers = getCustomers();
+            let customer = customers.find(c => c.phone === customerPhone);
+            let customerId;
+            
+            if (customer) {
+                // Update existing customer
+                customerId = customer.id;
+                customer.name = customerName;
+                customer.address = customerAddress || customer.address;
+                customer.totalOrders = (customer.totalOrders || 0) + 1;
+                customer.totalAmount = (customer.totalAmount || 0) + totalAmount;
+                customer.totalPaid = (customer.totalPaid || 0) + (paymentMode === 'cash' ? totalAmount : (paymentMode === 'partial' ? advanceAmount : 0));
+                customer.balance = (customer.balance || 0) + (paymentMode === 'credit' ? totalAmount : (paymentMode === 'partial' ? (totalAmount - advanceAmount) : 0));
+                customer.lastPurchaseDate = new Date().toISOString();
+                customer.updatedAt = new Date().toISOString();
+            } else {
+                // Create new customer
+                customerId = Date.now();
+                customer = {
+                    id: customerId,
+                    name: customerName,
+                    phone: customerPhone,
+                    address: customerAddress,
+                    totalOrders: 1,
+                    totalAmount: totalAmount,
+                    totalPaid: paymentMode === 'cash' ? totalAmount : (paymentMode === 'partial' ? advanceAmount : 0),
+                    balance: paymentMode === 'credit' ? totalAmount : (paymentMode === 'partial' ? (totalAmount - advanceAmount) : 0),
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    lastPurchaseDate: new Date().toISOString()
+                };
+                customers.push(customer);
+            }
+            
+            // Save customer
+            localStorage.setItem(STORAGE_KEYS.CUSTOMERS, JSON.stringify(customers));
+            
+            // Create orders for each cart item
+            const masterOrderId = Date.now();
+            const orders = [];
+            
+            shoppingCart.forEach((item, index) => {
+                const orderId = masterOrderId + index;
+                const order = {
+                    id: orderId,
+                    customerId: customerId,
+                    customerName: customerName,
+                    customerPhone: customerPhone,
+                    productId: item.productId,
+                    productName: item.productName,
+                    productCategory: item.productCategory,
+                    productBrand: item.productBrand,
+                    quantity: item.quantity,
+                    unit: item.unit,
+                    unitPrice: item.unitPrice,
+                    amount: item.itemTotal,
+                    paymentMode: paymentMode,
+                    advanceAmount: advanceAmount * (item.itemTotal / totalAmount), // Proportional advance
+                    balance: paymentMode === 'credit' ? item.itemTotal : 
+                             (paymentMode === 'partial' ? (item.itemTotal - (advanceAmount * (item.itemTotal / totalAmount))) : 0),
+                    notes: notes,
+                    date: new Date().toISOString().split('T')[0],
+                    timestamp: new Date().toISOString(),
+                    status: paymentMode === 'credit' ? 'pending' : (paymentMode === 'partial' ? 'partial' : 'paid'),
+                    cartOrder: true,
+                    masterOrderId: masterOrderId
+                };
+                
+                orders.push(order);
+            });
+            
+            // Save orders
+            let allOrders = getOrders();
+            orders.forEach(order => {
+                allOrders.push(order);
+            });
+            localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(allOrders));
+            
+            // Record payment if cash or partial
+            if (paymentMode === 'cash' || paymentMode === 'partial') {
+                const paymentAmount = paymentMode === 'partial' ? advanceAmount : totalAmount;
+                const paymentId = Date.now() + shoppingCart.length + 1;
+                const payment = {
+                    id: paymentId,
+                    customerId: customerId,
+                    customerName: customerName,
+                    customerPhone: customerPhone,
+                    orderIds: orders.map(o => o.id),
+                    amount: paymentAmount,
+                    paymentMode: 'cash',
+                    reference: `Cart Order #${masterOrderId}`,
+                    type: paymentMode === 'partial' ? 'advance' : 'full',
+                    date: new Date().toISOString().split('T')[0],
+                    timestamp: new Date().toISOString()
+                };
+                
+                let payments = getPayments();
+                payments.push(payment);
+                localStorage.setItem(STORAGE_KEYS.PAYMENTS, JSON.stringify(payments));
+                
+                // Update daily report payments
+                updateDailyReportWithPayment(payment);
+            }
+            
+            // Update daily reports for each order
+            orders.forEach(order => {
+                updateDailyReport(order);
+            });
+            
+            // Save to customer's individual Excel record
+            saveCartToCustomerExcel(customer, orders, totalAmount);
+            
+            // Generate combined receipt
+            generateCartReceipt(customer, orders, totalAmount, paymentMode, advanceAmount);
+            
+            // Clear cart and reset form
+            shoppingCart = [];
+            updateCartDisplay();
+            document.getElementById('customer-order-form').reset();
+            document.getElementById('category-select').value = '';
+            document.getElementById('product-select').innerHTML = '<option value="">Select Product</option>';
+            
+            // Close checkout modal
+            closeCheckoutModal();
+            
+            // Show success animation
+            playSuccessAnimation('customer');
+            
+            // Reload dashboard
+            loadDashboardData();
+            
+            showToast('Order completed successfully!');
+        }
+        
+        function saveCartToCustomerExcel(customer, orders, totalAmount) {
+            let customerExcel = JSON.parse(localStorage.getItem(STORAGE_KEYS.CUSTOMER_EXCEL)) || {};
+            
+            if (!customerExcel[customer.id]) {
+                customerExcel[customer.id] = {
+                    customerInfo: {
+                        id: customer.id,
+                        name: customer.name,
+                        phone: customer.phone,
+                        address: customer.address,
+                        joinDate: customer.createdAt
+                    },
+                    orders: [],
+                    payments: []
+                };
+            }
+            
+            // Add all orders
+            orders.forEach(order => {
+                customerExcel[customer.id].orders.push({
+                    orderId: order.id,
+                    date: order.date,
+                    time: new Date(order.timestamp).toLocaleTimeString(),
+                    productName: order.productName,
+                    quantity: order.quantity,
+                    unit: order.unit,
+                    amount: order.amount,
+                    paymentMode: order.paymentMode,
+                    advanceAmount: order.advanceAmount,
+                    balance: order.balance,
+                    notes: order.notes,
+                    cartOrder: true
+                });
+            });
+            
+            localStorage.setItem(STORAGE_KEYS.CUSTOMER_EXCEL, JSON.stringify(customerExcel));
+        }
+        
+        function generateCartReceipt(customer, orders, totalAmount, paymentMode, advanceAmount) {
+            const date = new Date().toISOString().split('T')[0];
+            const time = new Date().toLocaleTimeString();
+            const receiptNo = 'CART-' + Date.now().toString().slice(-6);
+            
+            // Build receipt content
+            let receiptHTML = `
+                <div class="text-center mb-4">
+                    <h2 class="text-2xl font-bold">NAMAN ENTERPRISES</h2>
+                    <p class="text-gray-600">Building Materials Supplier</p>
+                    <p class="text-sm">Receipt No: ${receiptNo}</p>
+                </div>
+                
+                <div class="border-t border-b border-gray-300 py-3 my-3">
+                    <div class="flex justify-between mb-2">
+                        <span class="font-semibold">Date:</span>
+                        <span>${date}</span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span class="font-semibold">Time:</span>
+                        <span>${time}</span>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h3 class="font-bold text-lg mb-2">Customer Details</h3>
+                    <p><strong>Name:</strong> ${customer.name}</p>
+                    <p><strong>Phone:</strong> ${customer.phone}</p>
+                    ${customer.address ? `<p><strong>Address:</strong> ${customer.address}</p>` : ''}
+                </div>
+                
+                <div class="border-t border-b border-gray-300 py-3 my-3">
+                    <h3 class="font-bold text-lg mb-2">Order Summary</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="py-2 px-3 text-left">Product</th>
+                                    <th class="py-2 px-3 text-left">Qty</th>
+                                    <th class="py-2 px-3 text-left">Unit Price</th>
+                                    <th class="py-2 px-3 text-left">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+            
+            orders.forEach(order => {
+                receiptHTML += `
+                    <tr class="border-t">
+                        <td class="py-2 px-3">${order.productName}</td>
+                        <td class="py-2 px-3">${order.quantity} ${order.unit}</td>
+                        <td class="py-2 px-3">₹${order.unitPrice}</td>
+                        <td class="py-2 px-3">₹${order.amount}</td>
+                    </tr>
+                `;
+            });
+            
+            receiptHTML += `
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-4 pt-4 border-t border-gray-300">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-medium">Payment Mode:</span>
+                            <span class="uppercase">${paymentMode}</span>
+                        </div>
+            `;
+            
+            if (paymentMode === 'partial') {
+                receiptHTML += `
+                        <div class="flex justify-between items-center mb-2">
+                            <span>Advance Paid:</span>
+                            <span>₹${advanceAmount}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span>Balance Due:</span>
+                            <span class="font-bold">₹${totalAmount - advanceAmount}</span>
+                        </div>
+                `;
+            }
+            
+            receiptHTML += `
+                        <div class="flex justify-between items-center text-xl font-bold mt-4">
+                            <span>Total Amount:</span>
+                            <span>₹${totalAmount}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-300 pt-4 mt-6 text-center text-sm text-gray-500">
+                    <p>Thank you for your business!</p>
+                    <p>For any queries, contact: ${document.getElementById('user-name').textContent}</p>
+                </div>
+            `;
+            
+            // Set receipt content
+            currentReceiptData = {
+                customerName: customer.name,
+                customerPhone: customer.phone,
+                customerAddress: customer.address,
+                products: orders.map(o => ({
+                    name: o.productName,
+                    quantity: o.quantity,
+                    unit: o.unit,
+                    unitPrice: o.unitPrice,
+                    amount: o.amount
+                })),
+                totalAmount: totalAmount,
+                paymentMode: paymentMode,
+                advanceAmount: advanceAmount,
+                date: date,
+                time: time,
+                receiptNo: receiptNo,
+                notes: orders[0]?.notes || ''
+            };
+            
+            document.getElementById('receipt-content').innerHTML = receiptHTML;
+            document.getElementById('receipt-modal').classList.remove('hidden');
+        }
+        
+        // ==================== BACKUP & RESTORE FUNCTIONS ====================
+        function backupAllData() {
+            try {
+                const backup = {
+                    customers: getCustomers(),
+                    orders: getOrders(),
+                    payments: getPayments(),
+                    products: getProducts(),
+                    dailyReports: getDailyReports(),
+                    timestamp: new Date().toISOString(),
+                    version: 'v4',
+                    totalRecords: {
+                        customers: getCustomers().length,
+                        orders: getOrders().length,
+                        payments: getPayments().length,
+                        products: getProducts().length,
+                        dailyReports: getDailyReports().length
+                    }
+                };
+                
+                const dataStr = JSON.stringify(backup, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                
+                const today = new Date();
+                const dateStr = today.toISOString().split('T')[0];
+                const timeStr = today.getHours().toString().padStart(2, '0') + 
+                               today.getMinutes().toString().padStart(2, '0');
+                
+                const exportFileDefaultName = `Naman_Enterprises_Backup_${dateStr}_${timeStr}.json`;
+                
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+                
+                showToast(`Backup created successfully! File: ${exportFileDefaultName}`);
+                
+            } catch (error) {
+                showToast('Error creating backup: ' + error.message, 'error');
+            }
+        }
+        
+        function restoreFromBackup(file) {
+            if (!confirm('⚠️ WARNING: This will overwrite ALL current data. Are you sure?')) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const backup = JSON.parse(e.target.result);
+                    
+                    // Validate backup structure
+                    if (!backup.customers || !backup.orders || !backup.payments || !backup.products) {
+                        throw new Error('Invalid backup file format');
+                    }
+                    
+                    // Validate version
+                    if (!backup.version || !backup.version.startsWith('v')) {
+                        if (!confirm('This backup file appears to be from an older version. Restore anyway?')) return;
+                    }
+                    
+                    // Restore data
+                    localStorage.setItem(STORAGE_KEYS.CUSTOMERS, JSON.stringify(backup.customers));
+                    localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(backup.orders));
+                    localStorage.setItem(STORAGE_KEYS.PAYMENTS, JSON.stringify(backup.payments));
+                    localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(backup.products));
+                    localStorage.setItem(STORAGE_KEYS.DAILY_REPORTS, JSON.stringify(backup.dailyReports || []));
+                    
+                    // Reload everything
+                    setTimeout(() => {
+                        loadDashboardData();
+                        showToast(`Data restored successfully! Backup from ${backup.timestamp ? new Date(backup.timestamp).toLocaleString() : 'unknown date'}. Please refresh the page.`);
+                    }, 500);
+                    
+                } catch (error) {
+                    showToast('Error restoring backup: ' + error.message, 'error');
+                }
+            };
+            reader.readAsText(file);
         }
         
         // ==================== DATA MANAGEMENT ====================
@@ -1787,163 +2616,6 @@
             }
         }
         
-        // ==================== ORDER SUBMISSION ====================
-        document.getElementById('customer-order-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            saveCustomerAndOrder();
-        });
-        
-        function saveCustomerAndOrder() {
-            // Get form data
-            const customerName = document.getElementById('customer-name').value.trim();
-            const customerPhone = document.getElementById('customer-phone').value.trim();
-            const customerAddress = document.getElementById('customer-address').value.trim();
-            const productId = parseInt(document.getElementById('product-select').value);
-            const quantity = parseFloat(document.getElementById('material-quantity').value) || 0;
-            const unit = document.getElementById('unit-select').value;
-            const amount = parseFloat(document.getElementById('order-amount').value) || 0;
-            const paymentMode = document.getElementById('payment-mode').value;
-            const advanceAmount = paymentMode === 'partial' ? parseFloat(document.getElementById('advance-amount').value) || 0 : 0;
-            const notes = document.getElementById('order-notes').value.trim();
-            
-            // Validation
-            if (!customerName || !customerPhone || !productId || quantity <= 0 || amount <= 0) {
-                showToast('Please fill in all required fields', 'error');
-                return;
-            }
-            
-            if (!/^\d{10}$/.test(customerPhone)) {
-                showToast('Please enter a valid 10-digit phone number', 'error');
-                return;
-            }
-            
-            // Get product details
-            const products = getProducts();
-            const product = products.find(p => p.id === productId);
-            if (!product) {
-                showToast('Product not found', 'error');
-                return;
-            }
-            
-            // Check if customer exists
-            let customers = getCustomers();
-            let customer = customers.find(c => c.phone === customerPhone);
-            let customerId;
-            
-            if (customer) {
-                // Update existing customer
-                customerId = customer.id;
-                customer.name = customerName;
-                customer.address = customerAddress || customer.address;
-                customer.totalOrders = (customer.totalOrders || 0) + 1;
-                customer.totalAmount = (customer.totalAmount || 0) + amount;
-                customer.totalPaid = (customer.totalPaid || 0) + (paymentMode === 'cash' ? amount : (paymentMode === 'partial' ? advanceAmount : 0));
-                customer.balance = (customer.balance || 0) + (paymentMode === 'credit' ? amount : (paymentMode === 'partial' ? (amount - advanceAmount) : 0));
-                customer.lastPurchaseDate = new Date().toISOString();
-                customer.updatedAt = new Date().toISOString();
-            } else {
-                // Create new customer
-                customerId = Date.now();
-                customer = {
-                    id: customerId,
-                    name: customerName,
-                    phone: customerPhone,
-                    address: customerAddress,
-                    totalOrders: 1,
-                    totalAmount: amount,
-                    totalPaid: paymentMode === 'cash' ? amount : (paymentMode === 'partial' ? advanceAmount : 0),
-                    balance: paymentMode === 'credit' ? amount : (paymentMode === 'partial' ? (amount - advanceAmount) : 0),
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString(),
-                    lastPurchaseDate: new Date().toISOString()
-                };
-                customers.push(customer);
-            }
-            
-            // Save customer
-            localStorage.setItem(STORAGE_KEYS.CUSTOMERS, JSON.stringify(customers));
-            
-            // Create order
-            const orderId = Date.now();
-            const order = {
-                id: orderId,
-                customerId: customerId,
-                customerName: customerName,
-                customerPhone: customerPhone,
-                productId: productId,
-                productName: product.name,
-                productCategory: product.category,
-                productBrand: product.brand,
-                quantity: quantity,
-                unit: unit,
-                unitPrice: product.price,
-                amount: amount,
-                paymentMode: paymentMode,
-                advanceAmount: advanceAmount,
-                balance: paymentMode === 'credit' ? amount : (paymentMode === 'partial' ? (amount - advanceAmount) : 0),
-                notes: notes,
-                date: new Date().toISOString().split('T')[0],
-                timestamp: new Date().toISOString(),
-                status: paymentMode === 'credit' ? 'pending' : (paymentMode === 'partial' ? 'partial' : 'paid')
-            };
-            
-            // Save order
-            let orders = getOrders();
-            orders.push(order);
-            localStorage.setItem(STORAGE_KEYS.ORDERS, JSON.stringify(orders));
-            
-            // Record payment if cash or partial
-            if (paymentMode === 'cash' || paymentMode === 'partial') {
-                const paymentAmount = paymentMode === 'partial' ? advanceAmount : amount;
-                const paymentId = Date.now() + 1;
-                const payment = {
-                    id: paymentId,
-                    customerId: customerId,
-                    customerName: customerName,
-                    customerPhone: customerPhone,
-                    orderId: orderId,
-                    amount: paymentAmount,
-                    paymentMode: 'cash',
-                    reference: `Order #ORD${orderId.toString().padStart(4, '0')}`,
-                    type: paymentMode === 'partial' ? 'advance' : 'full',
-                    date: new Date().toISOString().split('T')[0],
-                    timestamp: new Date().toISOString()
-                };
-                
-                let payments = getPayments();
-                payments.push(payment);
-                localStorage.setItem(STORAGE_KEYS.PAYMENTS, JSON.stringify(payments));
-                
-                // Update daily report payments
-                updateDailyReportWithPayment(payment);
-            }
-            
-            // Update daily report for order
-            updateDailyReport(order);
-            
-            // Save to customer's individual Excel record
-            saveToCustomerExcel(customer, order);
-            
-            // Reset form
-            document.getElementById('customer-order-form').reset();
-            document.getElementById('category-select').value = '';
-            document.getElementById('product-select').innerHTML = '<option value="">Select Product</option>';
-            document.getElementById('material-quantity').value = '1';
-            document.getElementById('unit-select').value = 'bags';
-            document.getElementById('advance-container').classList.add('hidden');
-            
-            // Show success animation
-            playSuccessAnimation('customer');
-            
-            // Show receipt
-            generateReceipt(customer, order, product);
-            
-            // Reload dashboard
-            loadDashboardData();
-            
-            showToast('Customer and order saved successfully!');
-        }
-        
         // ==================== PAYMENT FUNCTIONS ====================
         function openPaymentModal() {
             const customers = getCustomers().filter(c => c.balance > 0);
@@ -2088,6 +2760,47 @@
         // ==================== RECEIPT FUNCTIONS ====================
         function generateReceipt(customer = null, order = null, product = null) {
             if (!customer || !order || !product) {
+                // Check if we have items in cart
+                if (shoppingCart.length > 0) {
+                    // Get customer details from form
+                    const customerName = document.getElementById('customer-name').value.trim();
+                    const customerPhone = document.getElementById('customer-phone').value.trim();
+                    const customerAddress = document.getElementById('customer-address').value.trim();
+                    
+                    if (!customerName || !customerPhone) {
+                        showToast('Please enter customer details before generating receipt', 'error');
+                        return;
+                    }
+                    
+                    // Create temporary customer object
+                    const tempCustomer = {
+                        name: customerName,
+                        phone: customerPhone,
+                        address: customerAddress
+                    };
+                    
+                    // Create temporary orders from cart
+                    const tempOrders = shoppingCart.map(item => ({
+                        productName: item.productName,
+                        quantity: item.quantity,
+                        unit: item.unit,
+                        unitPrice: item.unitPrice,
+                        amount: item.itemTotal
+                    }));
+                    
+                    // Calculate total
+                    const totalAmount = shoppingCart.reduce((sum, item) => sum + item.itemTotal, 0);
+                    
+                    // Generate cart receipt preview
+                    generateCartReceipt(tempCustomer, tempOrders.map((o, i) => ({
+                        ...o,
+                        id: Date.now() + i,
+                        timestamp: new Date().toISOString()
+                    })), totalAmount, 'cash', 0);
+                    
+                    return;
+                }
+                
                 // Get form data for preview
                 const customerName = document.getElementById('customer-name').value.trim();
                 const customerPhone = document.getElementById('customer-phone').value.trim();
@@ -2995,16 +3708,10 @@
                 
                 todaySalesCard.classList.add('pulse-success');
                 setTimeout(() => todaySalesCard.classList.remove('pulse-success'), 2000);
-                
-                // Create confetti effect
-                createConfetti();
             } else if (type === 'payment') {
                 const pendingPaymentsCard = document.querySelector('#pending-payments').closest('.stat-card');
                 pendingPaymentsCard.classList.add('pulse-success');
                 setTimeout(() => pendingPaymentsCard.classList.remove('pulse-success'), 2000);
-                
-                // Create coin animation
-                createCoinAnimation();
             }
         }
         
@@ -3018,67 +3725,6 @@
                         deletedRows[deletedRows.length - 1].style.animation = '';
                     }
                 }, 500);
-            }
-        }
-        
-        function createConfetti() {
-            const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444'];
-            const container = document.querySelector('main');
-            
-            for (let i = 0; i < 50; i++) {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                confetti.style.setProperty('--color', colors[Math.floor(Math.random() * colors.length)]);
-                confetti.style.setProperty('--left', `${Math.random() * 100}%`);
-                confetti.style.width = `${Math.random() * 10 + 5}px`;
-                confetti.style.height = confetti.style.width;
-                confetti.style.animationDelay = `${Math.random() * 0.5}s`;
-                container.appendChild(confetti);
-                
-                setTimeout(() => {
-                    if (confetti.parentNode) {
-                        confetti.parentNode.removeChild(confetti);
-                    }
-                }, 2000);
-            }
-        }
-        
-        function createCoinAnimation() {
-            const container = document.querySelector('main');
-            const coin = document.createElement('div');
-            coin.innerHTML = '💰';
-            coin.style.position = 'fixed';
-            coin.style.top = '50%';
-            coin.style.left = '50%';
-            coin.style.fontSize = '3rem';
-            coin.style.transform = 'translate(-50%, -50%)';
-            coin.style.zIndex = '1000';
-            coin.style.animation = 'coinSpin 1s ease-in-out forwards';
-            container.appendChild(coin);
-            
-            setTimeout(() => {
-                if (coin.parentNode) {
-                    coin.parentNode.removeChild(coin);
-                }
-            }, 1000);
-            
-            // Add CSS for coin animation
-            if (!document.querySelector('#coin-animation-style')) {
-                const style = document.createElement('style');
-                style.id = 'coin-animation-style';
-                style.textContent = `
-                    @keyframes coinSpin {
-                        0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
-                        50% { transform: translate(-50%, -50%) scale(1.2) rotate(180deg); opacity: 1; }
-                        100% { transform: translate(-50%, -50%) scale(1) rotate(360deg); opacity: 0; }
-                    }
-                    @keyframes shake {
-                        0%, 100% { transform: translateX(0); }
-                        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-                        20%, 40%, 60%, 80% { transform: translateX(5px); }
-                    }
-                `;
-                document.head.appendChild(style);
             }
         }
         
@@ -3316,10 +3962,10 @@
         
         // ==================== KEYBOARD SHORTCUTS ====================
         document.addEventListener('keydown', function(e) {
-            // Ctrl + S to save order
+            // Ctrl + S to add to cart
             if (e.ctrlKey && e.key === 's') {
                 e.preventDefault();
-                document.getElementById('customer-order-form').dispatchEvent(new Event('submit'));
+                addToCart();
             }
             
             // Ctrl + F to search
@@ -3334,6 +3980,7 @@
                 document.getElementById('payment-modal').classList.add('hidden');
                 document.getElementById('receipt-modal').classList.add('hidden');
                 document.getElementById('price-modal').classList.add('hidden');
+                document.getElementById('checkout-modal').classList.add('hidden');
             }
         });
     </script>
