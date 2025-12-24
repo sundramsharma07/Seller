@@ -158,6 +158,24 @@
             from { width: 0 }
             to { width: 100% }
         }
+        /* New styles for password toggle */
+        .password-container {
+            position: relative;
+        }
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .password-toggle:hover {
+            color: #3b82f6;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -833,7 +851,7 @@
         </div>
     </footer>
 
-    <!-- Auth Modal -->
+    <!-- Auth Modal with Show Password -->
     <div id="auth-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden info-modal">
         <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
             <div class="flex justify-between items-center mb-6">
@@ -853,11 +871,14 @@
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                placeholder="owner@namanenterprises.com">
                     </div>
-                    <div>
+                    <div class="password-container">
                         <label class="block text-gray-700 mb-2 font-medium">Password</label>
                         <input type="password" id="login-password" 
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-12"
                                placeholder="Enter your password">
+                        <button type="button" class="password-toggle" id="toggle-login-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
                         <div class="text-right mt-2">
                             <button id="show-register-form" class="text-blue-600 text-sm hover:text-blue-800 font-medium">
                                 New user? Register here
@@ -888,11 +909,23 @@
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                placeholder="owner@namanenterprises.com">
                     </div>
-                    <div>
+                    <div class="password-container">
                         <label class="block text-gray-700 mb-2 font-medium">Password</label>
                         <input type="password" id="register-password" 
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-12"
                                placeholder="Create a password">
+                        <button type="button" class="password-toggle" id="toggle-register-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="password-container">
+                        <label class="block text-gray-700 mb-2 font-medium">Confirm Password</label>
+                        <input type="password" id="register-confirm-password" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-12"
+                               placeholder="Confirm your password">
+                        <button type="button" class="password-toggle" id="toggle-register-confirm-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
                     </div>
                     <div class="text-right">
                         <button id="show-login-form" class="text-blue-600 text-sm hover:text-blue-800 font-medium">
@@ -1559,6 +1592,7 @@
             setupMobileMenu();
             setupCounterAnimation();
             setupContactForm();
+            setupPasswordToggles();
             
             // Check if user is already logged in
             const currentUser = JSON.parse(localStorage.getItem(CURRENT_USER_KEY));
@@ -1627,6 +1661,45 @@
                     e.preventDefault();
                     alert('Thank you for your inquiry! We will contact you within 24 hours.');
                     contactForm.reset();
+                });
+            }
+        }
+        
+        // Password Toggle Functionality
+        function setupPasswordToggles() {
+            // Login password toggle
+            const toggleLoginPassword = document.getElementById('toggle-login-password');
+            const loginPasswordInput = document.getElementById('login-password');
+            
+            if (toggleLoginPassword && loginPasswordInput) {
+                toggleLoginPassword.addEventListener('click', function() {
+                    const type = loginPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    loginPasswordInput.setAttribute('type', type);
+                    this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+                });
+            }
+            
+            // Register password toggle
+            const toggleRegisterPassword = document.getElementById('toggle-register-password');
+            const registerPasswordInput = document.getElementById('register-password');
+            
+            if (toggleRegisterPassword && registerPasswordInput) {
+                toggleRegisterPassword.addEventListener('click', function() {
+                    const type = registerPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    registerPasswordInput.setAttribute('type', type);
+                    this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+                });
+            }
+            
+            // Register confirm password toggle
+            const toggleRegisterConfirmPassword = document.getElementById('toggle-register-confirm-password');
+            const registerConfirmPasswordInput = document.getElementById('register-confirm-password');
+            
+            if (toggleRegisterConfirmPassword && registerConfirmPasswordInput) {
+                toggleRegisterConfirmPassword.addEventListener('click', function() {
+                    const type = registerConfirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    registerConfirmPasswordInput.setAttribute('type', type);
+                    this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
                 });
             }
         }
@@ -1742,6 +1815,14 @@
                     document.getElementById('login-email').value = '';
                     document.getElementById('login-password').value = '';
                     
+                    // Reset password visibility
+                    const loginPasswordInput = document.getElementById('login-password');
+                    const toggleLoginPassword = document.getElementById('toggle-login-password');
+                    if (loginPasswordInput && toggleLoginPassword) {
+                        loginPasswordInput.setAttribute('type', 'password');
+                        toggleLoginPassword.innerHTML = '<i class="fas fa-eye"></i>';
+                    }
+                    
                     // Redirect to dashboard
                     window.location.href = 'dashboard.html';
                 } else {
@@ -1839,6 +1920,19 @@
                 document.getElementById('register-name').value = '';
                 document.getElementById('register-password').value = '';
                 document.getElementById('register-confirm-password').value = '';
+                
+                // Reset password visibility
+                const passwordInputs = [
+                    {input: document.getElementById('register-password'), toggle: document.getElementById('toggle-register-password')},
+                    {input: document.getElementById('register-confirm-password'), toggle: document.getElementById('toggle-register-confirm-password')}
+                ];
+                
+                passwordInputs.forEach(item => {
+                    if (item.input && item.toggle) {
+                        item.input.setAttribute('type', 'password');
+                        item.toggle.innerHTML = '<i class="fas fa-eye"></i>';
+                    }
+                });
                 
                 // Redirect to dashboard
                 authModal.classList.add('hidden');
